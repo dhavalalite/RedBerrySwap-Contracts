@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity 0.8.6;
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
@@ -351,7 +351,7 @@ interface IBEP20 {
     );
 }
 
-pragma solidity >=0.6.2 <0.8.0;
+pragma solidity 0.8.6;
 
 /**
  * @dev Collection of functions related to the address type
@@ -603,7 +603,7 @@ library Address {
     }
 }
 
-pragma solidity >=0.6.2 <0.8.0;
+pragma solidity 0.8.6;
 
 interface IRedBerryReferral {
     /**
@@ -623,7 +623,7 @@ interface IRedBerryReferral {
     function getReferrer(address user) external view returns (address);
 }
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity 0.8.6;
 
 /**
  * @title SafeBEP20
@@ -750,7 +750,7 @@ library SafeBEP20 {
     }
 }
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity 0.8.6;
 
 /*
  * @dev Provides information about the current execution context, including the
@@ -764,7 +764,7 @@ pragma solidity >=0.6.0 <0.8.0;
  */
 abstract contract Context {
     function _msgSender() internal view virtual returns (address payable) {
-        return msg.sender;
+        return payable(msg.sender);
     }
 
     function _msgData() internal view virtual returns (bytes memory) {
@@ -773,7 +773,7 @@ abstract contract Context {
     }
 }
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity 0.8.6;
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -798,7 +798,7 @@ abstract contract Ownable is Context {
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
-    constructor() internal {
+    constructor() {
         address msgSender = _msgSender();
         _owner = msgSender;
         emit OwnershipTransferred(address(0), msgSender);
@@ -893,9 +893,9 @@ contract BEP20 is Context, IBEP20, Ownable {
      * All three of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(string memory name, string memory symbol) public {
-        _name = name;
-        _symbol = symbol;
+    constructor(string memory Name, string memory Symbol) {
+        _name = Name;
+        _symbol = Symbol;
         _decimals = 18;
     }
 
@@ -1195,7 +1195,7 @@ contract BEP20 is Context, IBEP20, Ownable {
     }
 }
 
-pragma solidity >=0.6.2 <0.8.0;
+pragma solidity 0.8.6;
 
 // RedBerryToken with Governance.
 contract RedBerryToken is BEP20("RedBerry", "REDB") {
@@ -1452,7 +1452,7 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
         return uint32(n);
     }
 
-    function getChainId() internal pure returns (uint256) {
+    function getChainId() internal view returns (uint256) {
         uint256 chainId;
         assembly {
             chainId := chainid()
@@ -1462,7 +1462,7 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
 }
 // File: contracts\MasterChef.sol
 
-pragma solidity >=0.6.2 <0.8.0;
+pragma solidity 0.8.6;
 
 // MasterChef is the master of RedBerry. He can make RedBerry and he is a fair guy.
 //
@@ -1548,7 +1548,7 @@ contract MasterChef is Ownable {
         uint256 _redBerryPerBlock,
         uint256 _startBlock,
         uint16 _depositFeeBP
-    ) public {
+    ) {
         RedBerry = _redBerry;
         devaddr = _devaddr;
         feeAddress = _feeAddress;

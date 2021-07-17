@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity 0.8.6;
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
@@ -245,7 +245,7 @@ library SafeMath {
     }
 }
 
-pragma solidity >=0.6.4;
+pragma solidity 0.8.6;
 
 interface IBEP20 {
     /**
@@ -353,7 +353,7 @@ interface IBEP20 {
 
 // File: contracts\libs\Address.sol
 
-pragma solidity >=0.6.2 <0.8.0;
+pragma solidity 0.8.6;
 
 /**
  * @dev Collection of functions related to the address type
@@ -605,7 +605,7 @@ library Address {
     }
 }
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity 0.8.6;
 
 /**
  * @title SafeBEP20
@@ -732,7 +732,7 @@ library SafeBEP20 {
     }
 }
 
-pragma solidity >=0.6.2 <0.8.0;
+pragma solidity 0.8.6;
 
 interface IRedBerryReferral {
     /**
@@ -751,7 +751,7 @@ interface IRedBerryReferral {
      */
     function getReferrer(address user) external view returns (address);
 }
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity 0.8.6;
 
 /*
  * @dev Provides information about the current execution context, including the
@@ -765,7 +765,7 @@ pragma solidity >=0.6.0 <0.8.0;
  */
 abstract contract Context {
     function _msgSender() internal view virtual returns (address payable) {
-        return msg.sender;
+        return payable(msg.sender);
     }
 
     function _msgData() internal view virtual returns (bytes memory) {
@@ -774,7 +774,7 @@ abstract contract Context {
     }
 }
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity 0.8.6;
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -799,7 +799,7 @@ abstract contract Ownable is Context {
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
-    constructor() internal {
+    constructor() {
         address msgSender = _msgSender();
         _owner = msgSender;
         emit OwnershipTransferred(address(0), msgSender);
@@ -846,7 +846,7 @@ abstract contract Ownable is Context {
     }
 }
 
-pragma solidity >=0.6.2 <0.8.0;
+pragma solidity 0.8.6;
 
 contract RedBerryReferral is IRedBerryReferral, Ownable {
     using SafeBEP20 for IBEP20;

@@ -1,4 +1,6 @@
-pragma solidity 0.6.12;
+// SPDX-License-Identifier: MIT
+
+pragma solidity 0.8.6;
 
 //
 /*
@@ -14,10 +16,10 @@ pragma solidity 0.6.12;
 contract Context {
     // Empty internal constructor, to prevent people from mistakenly deploying
     // an instance of this contract, which should be used via inheritance.
-    constructor() internal {}
+    constructor() {}
 
     function _msgSender() internal view returns (address payable) {
-        return msg.sender;
+        return payable(msg.sender);
     }
 
     function _msgData() internal view returns (bytes memory) {
@@ -50,7 +52,7 @@ contract Ownable is Context {
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
-    constructor() internal {
+    constructor()  {
         address msgSender = _msgSender();
         _owner = msgSender;
         emit OwnershipTransferred(address(0), msgSender);
@@ -626,9 +628,9 @@ contract BEP20 is Context, IBEP20, Ownable {
      * All three of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(string memory name, string memory symbol) public {
-        _name = name;
-        _symbol = symbol;
+    constructor(string memory Name, string memory Symbol) {
+        _name = Name;
+        _symbol = Symbol;
         _decimals = 18;
     }
 
@@ -1042,7 +1044,7 @@ contract RedBerry is BEP20("RedBerry", "REDB") {
             nonce == nonces[signatory]++,
             "REDB::delegateBySig: invalid nonce"
         );
-        require(now <= expiry, "REDB::delegateBySig: signature expired");
+        require(block.timestamp <= expiry, "REDB::delegateBySig: signature expired");
         return _delegate(signatory, delegatee);
     }
 
@@ -1127,7 +1129,7 @@ contract RedBerry is BEP20("RedBerry", "REDB") {
                 uint256 srcRepOld = srcRepNum > 0
                     ? checkpoints[srcRep][srcRepNum - 1].votes
                     : 0;
-                uint256 srcRepNew = srcRepOld.sub(amount);
+                uint256 srcRepNew = srcRepOld - amount;
                 _writeCheckpoint(srcRep, srcRepNum, srcRepOld, srcRepNew);
             }
 
@@ -1137,7 +1139,7 @@ contract RedBerry is BEP20("RedBerry", "REDB") {
                 uint256 dstRepOld = dstRepNum > 0
                     ? checkpoints[dstRep][dstRepNum - 1].votes
                     : 0;
-                uint256 dstRepNew = dstRepOld.add(amount);
+                uint256 dstRepNew = dstRepOld + amount;
                 _writeCheckpoint(dstRep, dstRepNum, dstRepOld, dstRepNew);
             }
         }
@@ -1179,7 +1181,7 @@ contract RedBerry is BEP20("RedBerry", "REDB") {
         return uint32(n);
     }
 
-    function getChainId() internal pure returns (uint256) {
+    function getChainId() internal view returns (uint256) {
         uint256 chainId;
         assembly {
             chainId := chainid()

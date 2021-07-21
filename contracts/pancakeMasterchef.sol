@@ -1,7 +1,10 @@
-// SPDX-License-Identifier: MIT
+/**
+ *Submitted for verification at BscScan.com on 2020-09-22
+ */
 
-pragma solidity 0.8.6;
+pragma solidity 0.6.12;
 
+//
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
  * checks.
@@ -17,82 +20,6 @@ pragma solidity 0.8.6;
  */
 library SafeMath {
     /**
-     * @dev Returns the addition of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryAdd(uint256 a, uint256 b)
-        internal
-        pure
-        returns (bool, uint256)
-    {
-        uint256 c = a + b;
-        if (c < a) return (false, 0);
-        return (true, c);
-    }
-
-    /**
-     * @dev Returns the substraction of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
-    function trySub(uint256 a, uint256 b)
-        internal
-        pure
-        returns (bool, uint256)
-    {
-        if (b > a) return (false, 0);
-        return (true, a - b);
-    }
-
-    /**
-     * @dev Returns the multiplication of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryMul(uint256 a, uint256 b)
-        internal
-        pure
-        returns (bool, uint256)
-    {
-        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
-        // benefit is lost if 'b' is also tested.
-        // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
-        if (a == 0) return (true, 0);
-        uint256 c = a * b;
-        if (c / a != b) return (false, 0);
-        return (true, c);
-    }
-
-    /**
-     * @dev Returns the division of two unsigned integers, with a division by zero flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryDiv(uint256 a, uint256 b)
-        internal
-        pure
-        returns (bool, uint256)
-    {
-        if (b == 0) return (false, 0);
-        return (true, a / b);
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers, with a division by zero flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryMod(uint256 a, uint256 b)
-        internal
-        pure
-        returns (bool, uint256)
-    {
-        if (b == 0) return (false, 0);
-        return (true, a % b);
-    }
-
-    /**
      * @dev Returns the addition of two unsigned integers, reverting on
      * overflow.
      *
@@ -105,6 +32,7 @@ library SafeMath {
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
         require(c >= a, "SafeMath: addition overflow");
+
         return c;
     }
 
@@ -119,67 +47,12 @@ library SafeMath {
      * - Subtraction cannot overflow.
      */
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b <= a, "SafeMath: subtraction overflow");
-        return a - b;
-    }
-
-    /**
-     * @dev Returns the multiplication of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `*` operator.
-     *
-     * Requirements:
-     *
-     * - Multiplication cannot overflow.
-     */
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-        if (a == 0) return 0;
-        uint256 c = a * b;
-        require(c / a == b, "SafeMath: multiplication overflow");
-        return c;
-    }
-
-    /**
-     * @dev Returns the integer division of two unsigned integers, reverting on
-     * division by zero. The result is rounded towards zero.
-     *
-     * Counterpart to Solidity's `/` operator. Note: this function uses a
-     * `revert` opcode (which leaves remaining gas untouched) while Solidity
-     * uses an invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b > 0, "SafeMath: division by zero");
-        return a / b;
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * reverting when dividing by zero.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b > 0, "SafeMath: modulo by zero");
-        return a % b;
+        return sub(a, b, "SafeMath: subtraction overflow");
     }
 
     /**
      * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
      * overflow (when the result is negative).
-     *
-     * CAUTION: This function is deprecated because it requires allocating memory for the error
-     * message unnecessarily. For custom revert reasons use {trySub}.
      *
      * Counterpart to Solidity's `-` operator.
      *
@@ -193,15 +66,54 @@ library SafeMath {
         string memory errorMessage
     ) internal pure returns (uint256) {
         require(b <= a, errorMessage);
-        return a - b;
+        uint256 c = a - b;
+
+        return c;
     }
 
     /**
-     * @dev Returns the integer division of two unsigned integers, reverting with custom message on
+     * @dev Returns the multiplication of two unsigned integers, reverting on
+     * overflow.
+     *
+     * Counterpart to Solidity's `*` operator.
+     *
+     * Requirements:
+     *
+     * - Multiplication cannot overflow.
+     */
+    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
+        // benefit is lost if 'b' is also tested.
+        // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
+        if (a == 0) {
+            return 0;
+        }
+
+        uint256 c = a * b;
+        require(c / a == b, "SafeMath: multiplication overflow");
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the integer division of two unsigned integers. Reverts on
      * division by zero. The result is rounded towards zero.
      *
-     * CAUTION: This function is deprecated because it requires allocating memory for the error
-     * message unnecessarily. For custom revert reasons use {tryDiv}.
+     * Counterpart to Solidity's `/` operator. Note: this function uses a
+     * `revert` opcode (which leaves remaining gas untouched) while Solidity
+     * uses an invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     *
+     * - The divisor cannot be zero.
+     */
+    function div(uint256 a, uint256 b) internal pure returns (uint256) {
+        return div(a, b, "SafeMath: division by zero");
+    }
+
+    /**
+     * @dev Returns the integer division of two unsigned integers. Reverts with custom message on
+     * division by zero. The result is rounded towards zero.
      *
      * Counterpart to Solidity's `/` operator. Note: this function uses a
      * `revert` opcode (which leaves remaining gas untouched) while Solidity
@@ -217,15 +129,31 @@ library SafeMath {
         string memory errorMessage
     ) internal pure returns (uint256) {
         require(b > 0, errorMessage);
-        return a / b;
+        uint256 c = a / b;
+        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+
+        return c;
     }
 
     /**
      * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * reverting with custom message when dividing by zero.
+     * Reverts when dividing by zero.
      *
-     * CAUTION: This function is deprecated because it requires allocating memory for the error
-     * message unnecessarily. For custom revert reasons use {tryMod}.
+     * Counterpart to Solidity's `%` operator. This function uses a `revert`
+     * opcode (which leaves remaining gas untouched) while Solidity uses an
+     * invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     *
+     * - The divisor cannot be zero.
+     */
+    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
+        return mod(a, b, "SafeMath: modulo by zero");
+    }
+
+    /**
+     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+     * Reverts with custom message when dividing by zero.
      *
      * Counterpart to Solidity's `%` operator. This function uses a `revert`
      * opcode (which leaves remaining gas untouched) while Solidity uses an
@@ -240,13 +168,30 @@ library SafeMath {
         uint256 b,
         string memory errorMessage
     ) internal pure returns (uint256) {
-        require(b > 0, errorMessage);
+        require(b != 0, errorMessage);
         return a % b;
+    }
+
+    function min(uint256 x, uint256 y) internal pure returns (uint256 z) {
+        z = x < y ? x : y;
+    }
+
+    // babylonian method (https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Babylonian_method)
+    function sqrt(uint256 y) internal pure returns (uint256 z) {
+        if (y > 3) {
+            z = y;
+            uint256 x = y / 2 + 1;
+            while (x < z) {
+                z = x;
+                x = (y / x + x) / 2;
+            }
+        } else if (y != 0) {
+            z = 1;
+        }
     }
 }
 
-pragma solidity >=0.6.4;
-
+//
 interface IBEP20 {
     /**
      * @dev Returns the amount of tokens in existence.
@@ -351,8 +296,7 @@ interface IBEP20 {
     );
 }
 
-pragma solidity 0.8.6;
-
+//
 /**
  * @dev Collection of functions related to the address type
  */
@@ -375,16 +319,18 @@ library Address {
      * ====
      */
     function isContract(address account) internal view returns (bool) {
-        // This method relies on extcodesize, which returns 0 for contracts in
-        // construction, since the code is only stored at the end of the
-        // constructor execution.
+        // According to EIP-1052, 0x0 is the value returned for not-yet created accounts
+        // and 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 is returned
+        // for accounts without code, i.e. `keccak256('')`
+        bytes32 codehash;
 
-        uint256 size;
+            bytes32 accountHash
+         = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            size := extcodesize(account)
+            codehash := extcodehash(account)
         }
-        return size > 0;
+        return (codehash != accountHash && codehash != 0x0);
     }
 
     /**
@@ -453,7 +399,7 @@ library Address {
         bytes memory data,
         string memory errorMessage
     ) internal returns (bytes memory) {
-        return functionCallWithValue(target, data, 0, errorMessage);
+        return _functionCallWithValue(target, data, 0, errorMessage);
     }
 
     /**
@@ -497,93 +443,21 @@ library Address {
             address(this).balance >= value,
             "Address: insufficient balance for call"
         );
+        return _functionCallWithValue(target, data, value, errorMessage);
+    }
+
+    function _functionCallWithValue(
+        address target,
+        bytes memory data,
+        uint256 weiValue,
+        string memory errorMessage
+    ) private returns (bytes memory) {
         require(isContract(target), "Address: call to non-contract");
 
         // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = target.call{value: value}(
+        (bool success, bytes memory returndata) = target.call{value: weiValue}(
             data
         );
-        return _verifyCallResult(success, returndata, errorMessage);
-    }
-
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
-     * but performing a static call.
-     *
-     * _Available since v3.3._
-     */
-    function functionStaticCall(address target, bytes memory data)
-        internal
-        view
-        returns (bytes memory)
-    {
-        return
-            functionStaticCall(
-                target,
-                data,
-                "Address: low-level static call failed"
-            );
-    }
-
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],
-     * but performing a static call.
-     *
-     * _Available since v3.3._
-     */
-    function functionStaticCall(
-        address target,
-        bytes memory data,
-        string memory errorMessage
-    ) internal view returns (bytes memory) {
-        require(isContract(target), "Address: static call to non-contract");
-
-        // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = target.staticcall(data);
-        return _verifyCallResult(success, returndata, errorMessage);
-    }
-
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
-     * but performing a delegate call.
-     *
-     * _Available since v3.4._
-     */
-    function functionDelegateCall(address target, bytes memory data)
-        internal
-        returns (bytes memory)
-    {
-        return
-            functionDelegateCall(
-                target,
-                data,
-                "Address: low-level delegate call failed"
-            );
-    }
-
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],
-     * but performing a delegate call.
-     *
-     * _Available since v3.4._
-     */
-    function functionDelegateCall(
-        address target,
-        bytes memory data,
-        string memory errorMessage
-    ) internal returns (bytes memory) {
-        require(isContract(target), "Address: delegate call to non-contract");
-
-        // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = target.delegatecall(data);
-        return _verifyCallResult(success, returndata, errorMessage);
-    }
-
-    function _verifyCallResult(
-        bool success,
-        bytes memory returndata,
-        string memory errorMessage
-    ) private pure returns (bytes memory) {
         if (success) {
             return returndata;
         } else {
@@ -603,28 +477,7 @@ library Address {
     }
 }
 
-pragma solidity 0.8.6;
-
-interface IRedBerryReferral {
-    /**
-     * @dev Record referral.
-     */
-    function recordReferral(address user, address referrer) external;
-
-    /**
-     * @dev Record referral commission.
-     */
-    function recordReferralCommission(address referrer, uint256 commission)
-        external;
-
-    /**
-     * @dev Get the referrer address that referred the user.
-     */
-    function getReferrer(address user) external view returns (address);
-}
-
-pragma solidity 0.8.6;
-
+//
 /**
  * @title SafeBEP20
  * @dev Wrappers around BEP20 operations that throw on failure (when the token
@@ -750,8 +603,7 @@ library SafeBEP20 {
     }
 }
 
-pragma solidity 0.8.6;
-
+//
 /*
  * @dev Provides information about the current execution context, including the
  * sender of the transaction and its data. While these are generally available
@@ -762,19 +614,22 @@ pragma solidity 0.8.6;
  *
  * This contract is only required for intermediate, library-like contracts.
  */
-abstract contract Context {
-    function _msgSender() internal view virtual returns (address payable) {
-        return payable(msg.sender);
+contract Context {
+    // Empty internal constructor, to prevent people from mistakenly deploying
+    // an instance of this contract, which should be used via inheritance.
+    constructor() internal {}
+
+    function _msgSender() internal view returns (address payable) {
+        return msg.sender;
     }
 
-    function _msgData() internal view virtual returns (bytes memory) {
+    function _msgData() internal view returns (bytes memory) {
         this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
         return msg.data;
     }
 }
 
-pragma solidity 0.8.6;
-
+//
 /**
  * @dev Contract module which provides a basic access control mechanism, where
  * there is an account (an owner) that can be granted exclusive access to
@@ -787,7 +642,7 @@ pragma solidity 0.8.6;
  * `onlyOwner`, which can be applied to your functions to restrict their use to
  * the owner.
  */
-abstract contract Ownable is Context {
+contract Ownable is Context {
     address private _owner;
 
     event OwnershipTransferred(
@@ -798,7 +653,7 @@ abstract contract Ownable is Context {
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
-    constructor() {
+    constructor() internal {
         address msgSender = _msgSender();
         _owner = msgSender;
         emit OwnershipTransferred(address(0), msgSender);
@@ -807,7 +662,7 @@ abstract contract Ownable is Context {
     /**
      * @dev Returns the address of the current owner.
      */
-    function owner() public view virtual returns (address) {
+    function owner() public view returns (address) {
         return _owner;
     }
 
@@ -815,7 +670,7 @@ abstract contract Ownable is Context {
      * @dev Throws if called by any account other than the owner.
      */
     modifier onlyOwner() {
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        require(_owner == _msgSender(), "Ownable: caller is not the owner");
         _;
     }
 
@@ -826,7 +681,7 @@ abstract contract Ownable is Context {
      * NOTE: Renouncing ownership will leave the contract without an owner,
      * thereby removing any functionality that is only available to the owner.
      */
-    function renounceOwnership() public virtual onlyOwner {
+    function renounceOwnership() public onlyOwner {
         emit OwnershipTransferred(_owner, address(0));
         _owner = address(0);
     }
@@ -835,7 +690,14 @@ abstract contract Ownable is Context {
      * @dev Transfers ownership of the contract to a new account (`newOwner`).
      * Can only be called by the current owner.
      */
-    function transferOwnership(address newOwner) public virtual onlyOwner {
+    function transferOwnership(address newOwner) public onlyOwner {
+        _transferOwnership(newOwner);
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     */
+    function _transferOwnership(address newOwner) internal {
         require(
             newOwner != address(0),
             "Ownable: new owner is the zero address"
@@ -845,8 +707,7 @@ abstract contract Ownable is Context {
     }
 }
 
-pragma solidity >=0.4.0;
-
+//
 /**
  * @dev Implementation of the {IBEP20} interface.
  *
@@ -873,6 +734,7 @@ pragma solidity >=0.4.0;
  */
 contract BEP20 is Context, IBEP20, Ownable {
     using SafeMath for uint256;
+    using Address for address;
 
     mapping(address => uint256) private _balances;
 
@@ -893,9 +755,9 @@ contract BEP20 is Context, IBEP20, Ownable {
      * All three of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(string memory Name, string memory Symbol) {
-        _name = Name;
-        _symbol = Symbol;
+    constructor(string memory name, string memory symbol) public {
+        _name = name;
+        _symbol = symbol;
         _decimals = 18;
     }
 
@@ -907,25 +769,24 @@ contract BEP20 is Context, IBEP20, Ownable {
     }
 
     /**
-     * @dev Returns the name of the token.
+     * @dev Returns the token name.
      */
     function name() public view override returns (string memory) {
         return _name;
     }
 
     /**
-     * @dev Returns the symbol of the token, usually a shorter version of the
-     * name.
-     */
-    function symbol() public view override returns (string memory) {
-        return _symbol;
-    }
-
-    /**
-     * @dev Returns the number of decimals used to get its user representation.
+     * @dev Returns the token decimals.
      */
     function decimals() public view override returns (uint8) {
         return _decimals;
+    }
+
+    /**
+     * @dev Returns the token symbol.
+     */
+    function symbol() public view override returns (string memory) {
+        return _symbol;
     }
 
     /**
@@ -1195,10 +1056,8 @@ contract BEP20 is Context, IBEP20, Ownable {
     }
 }
 
-pragma solidity 0.8.6;
-
-// RedBerryToken with Governance.
-contract RedBerryToken is BEP20("RedBerry", "REDB") {
+// CakeToken with Governance.
+contract CakeToken is BEP20("PancakeSwap Token", "Cake") {
     /// @notice Creates `_amount` token to `_to`. Must only be called by the owner (MasterChef).
     function mint(address _to, uint256 _amount) public onlyOwner {
         _mint(_to, _amount);
@@ -1211,7 +1070,7 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
     // Which is copied and modified from COMPOUND:
     // https://github.com/compound-finance/compound-protocol/blob/master/contracts/Governance/Comp.sol
 
-    // / @notice A record of each accounts delegate
+    /// @notice A record of each accounts delegate
     mapping(address => address) internal _delegates;
 
     /// @notice A checkpoint for marking number of votes from a given block
@@ -1306,16 +1165,13 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
         address signatory = ecrecover(digest, v, r, s);
         require(
             signatory != address(0),
-            "REDB::delegateBySig: invalid signature"
+            "CAKE::delegateBySig: invalid signature"
         );
         require(
             nonce == nonces[signatory]++,
-            "REDB::delegateBySig: invalid nonce"
+            "CAKE::delegateBySig: invalid nonce"
         );
-        require(
-            block.timestamp <= expiry,
-            "REDB::delegateBySig: signature expired"
-        );
+        require(now <= expiry, "CAKE::delegateBySig: signature expired");
         return _delegate(signatory, delegatee);
     }
 
@@ -1344,7 +1200,7 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
     {
         require(
             blockNumber < block.number,
-            "REDB::getPriorVotes: not yet determined"
+            "CAKE::getPriorVotes: not yet determined"
         );
 
         uint32 nCheckpoints = numCheckpoints[account];
@@ -1380,7 +1236,7 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
 
     function _delegate(address delegator, address delegatee) internal {
         address currentDelegate = _delegates[delegator];
-        uint256 delegatorBalance = balanceOf(delegator); // balance of underlying REDBs (not scaled);
+        uint256 delegatorBalance = balanceOf(delegator); // balance of underlying CAKEs (not scaled);
         _delegates[delegator] = delegatee;
 
         emit DelegateChanged(delegator, currentDelegate, delegatee);
@@ -1400,7 +1256,7 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
                 uint256 srcRepOld = srcRepNum > 0
                     ? checkpoints[srcRep][srcRepNum - 1].votes
                     : 0;
-                uint256 srcRepNew = srcRepOld - amount;
+                uint256 srcRepNew = srcRepOld.sub(amount);
                 _writeCheckpoint(srcRep, srcRepNum, srcRepOld, srcRepNew);
             }
 
@@ -1410,7 +1266,7 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
                 uint256 dstRepOld = dstRepNum > 0
                     ? checkpoints[dstRep][dstRepNum - 1].votes
                     : 0;
-                uint256 dstRepNew = dstRepOld + amount;
+                uint256 dstRepNew = dstRepOld.add(amount);
                 _writeCheckpoint(dstRep, dstRepNum, dstRepOld, dstRepNew);
             }
         }
@@ -1424,7 +1280,7 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
     ) internal {
         uint32 blockNumber = safe32(
             block.number,
-            "REDB::_writeCheckpoint: block number exceeds 32 bits"
+            "CAKE::_writeCheckpoint: block number exceeds 32 bits"
         );
 
         if (
@@ -1452,7 +1308,7 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
         return uint32(n);
     }
 
-    function getChainId() internal view returns (uint256) {
+    function getChainId() internal pure returns (uint256) {
         uint256 chainId;
         assembly {
             chainId := chainid()
@@ -1460,14 +1316,308 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
         return chainId;
     }
 }
-// File: contracts\MasterChef.sol
 
-pragma solidity 0.8.6;
+// SyrupBar with Governance.
+contract SyrupBar is BEP20("SyrupBar Token", "SYRUP") {
+    /// @notice Creates `_amount` token to `_to`. Must only be called by the owner (MasterChef).
+    function mint(address _to, uint256 _amount) public onlyOwner {
+        _mint(_to, _amount);
+        _moveDelegates(address(0), _delegates[_to], _amount);
+    }
 
-// MasterChef is the master of RedBerry. He can make RedBerry and he is a fair guy.
+    function burn(address _from, uint256 _amount) public onlyOwner {
+        _burn(_from, _amount);
+        _moveDelegates(address(0), _delegates[_from], _amount);
+    }
+
+    // The CAKE TOKEN!
+    CakeToken public cake;
+
+    constructor(CakeToken _cake) public {
+        cake = _cake;
+    }
+
+    // Safe cake transfer function, just in case if rounding error causes pool to not have enough CAKEs.
+    function safeCakeTransfer(address _to, uint256 _amount) public onlyOwner {
+        uint256 cakeBal = cake.balanceOf(address(this));
+        if (_amount > cakeBal) {
+            cake.transfer(_to, cakeBal);
+        } else {
+            cake.transfer(_to, _amount);
+        }
+    }
+
+    // Copied and modified from YAM code:
+    // https://github.com/yam-finance/yam-protocol/blob/master/contracts/token/YAMGovernanceStorage.sol
+    // https://github.com/yam-finance/yam-protocol/blob/master/contracts/token/YAMGovernance.sol
+    // Which is copied and modified from COMPOUND:
+    // https://github.com/compound-finance/compound-protocol/blob/master/contracts/Governance/Comp.sol
+
+    /// @notice A record of each accounts delegate
+    mapping(address => address) internal _delegates;
+
+    /// @notice A checkpoint for marking number of votes from a given block
+    struct Checkpoint {
+        uint32 fromBlock;
+        uint256 votes;
+    }
+
+    /// @notice A record of votes checkpoints for each account, by index
+    mapping(address => mapping(uint32 => Checkpoint)) public checkpoints;
+
+    /// @notice The number of checkpoints for each account
+    mapping(address => uint32) public numCheckpoints;
+
+    /// @notice The EIP-712 typehash for the contract's domain
+    bytes32 public constant DOMAIN_TYPEHASH =
+        keccak256(
+            "EIP712Domain(string name,uint256 chainId,address verifyingContract)"
+        );
+
+    /// @notice The EIP-712 typehash for the delegation struct used by the contract
+    bytes32 public constant DELEGATION_TYPEHASH =
+        keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
+
+    /// @notice A record of states for signing / validating signatures
+    mapping(address => uint256) public nonces;
+
+    /// @notice An event thats emitted when an account changes its delegate
+    event DelegateChanged(
+        address indexed delegator,
+        address indexed fromDelegate,
+        address indexed toDelegate
+    );
+
+    /// @notice An event thats emitted when a delegate account's vote balance changes
+    event DelegateVotesChanged(
+        address indexed delegate,
+        uint256 previousBalance,
+        uint256 newBalance
+    );
+
+    /**
+     * @notice Delegate votes from `msg.sender` to `delegatee`
+     * @param delegator The address to get delegatee for
+     */
+    function delegates(address delegator) external view returns (address) {
+        return _delegates[delegator];
+    }
+
+    /**
+     * @notice Delegate votes from `msg.sender` to `delegatee`
+     * @param delegatee The address to delegate votes to
+     */
+    function delegate(address delegatee) external {
+        return _delegate(msg.sender, delegatee);
+    }
+
+    /**
+     * @notice Delegates votes from signatory to `delegatee`
+     * @param delegatee The address to delegate votes to
+     * @param nonce The contract state required to match the signature
+     * @param expiry The time at which to expire the signature
+     * @param v The recovery byte of the signature
+     * @param r Half of the ECDSA signature pair
+     * @param s Half of the ECDSA signature pair
+     */
+    function delegateBySig(
+        address delegatee,
+        uint256 nonce,
+        uint256 expiry,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external {
+        bytes32 domainSeparator = keccak256(
+            abi.encode(
+                DOMAIN_TYPEHASH,
+                keccak256(bytes(name())),
+                getChainId(),
+                address(this)
+            )
+        );
+
+        bytes32 structHash = keccak256(
+            abi.encode(DELEGATION_TYPEHASH, delegatee, nonce, expiry)
+        );
+
+        bytes32 digest = keccak256(
+            abi.encodePacked("\x19\x01", domainSeparator, structHash)
+        );
+
+        address signatory = ecrecover(digest, v, r, s);
+        require(
+            signatory != address(0),
+            "CAKE::delegateBySig: invalid signature"
+        );
+        require(
+            nonce == nonces[signatory]++,
+            "CAKE::delegateBySig: invalid nonce"
+        );
+        require(now <= expiry, "CAKE::delegateBySig: signature expired");
+        return _delegate(signatory, delegatee);
+    }
+
+    /**
+     * @notice Gets the current votes balance for `account`
+     * @param account The address to get votes balance
+     * @return The number of current votes for `account`
+     */
+    function getCurrentVotes(address account) external view returns (uint256) {
+        uint32 nCheckpoints = numCheckpoints[account];
+        return
+            nCheckpoints > 0 ? checkpoints[account][nCheckpoints - 1].votes : 0;
+    }
+
+    /**
+     * @notice Determine the prior number of votes for an account as of a block number
+     * @dev Block number must be a finalized block or else this function will revert to prevent misinformation.
+     * @param account The address of the account to check
+     * @param blockNumber The block number to get the vote balance at
+     * @return The number of votes the account had as of the given block
+     */
+    function getPriorVotes(address account, uint256 blockNumber)
+        external
+        view
+        returns (uint256)
+    {
+        require(
+            blockNumber < block.number,
+            "CAKE::getPriorVotes: not yet determined"
+        );
+
+        uint32 nCheckpoints = numCheckpoints[account];
+        if (nCheckpoints == 0) {
+            return 0;
+        }
+
+        // First check most recent balance
+        if (checkpoints[account][nCheckpoints - 1].fromBlock <= blockNumber) {
+            return checkpoints[account][nCheckpoints - 1].votes;
+        }
+
+        // Next check implicit zero balance
+        if (checkpoints[account][0].fromBlock > blockNumber) {
+            return 0;
+        }
+
+        uint32 lower = 0;
+        uint32 upper = nCheckpoints - 1;
+        while (upper > lower) {
+            uint32 center = upper - (upper - lower) / 2; // ceil, avoiding overflow
+            Checkpoint memory cp = checkpoints[account][center];
+            if (cp.fromBlock == blockNumber) {
+                return cp.votes;
+            } else if (cp.fromBlock < blockNumber) {
+                lower = center;
+            } else {
+                upper = center - 1;
+            }
+        }
+        return checkpoints[account][lower].votes;
+    }
+
+    function _delegate(address delegator, address delegatee) internal {
+        address currentDelegate = _delegates[delegator];
+        uint256 delegatorBalance = balanceOf(delegator); // balance of underlying CAKEs (not scaled);
+        _delegates[delegator] = delegatee;
+
+        emit DelegateChanged(delegator, currentDelegate, delegatee);
+
+        _moveDelegates(currentDelegate, delegatee, delegatorBalance);
+    }
+
+    function _moveDelegates(
+        address srcRep,
+        address dstRep,
+        uint256 amount
+    ) internal {
+        if (srcRep != dstRep && amount > 0) {
+            if (srcRep != address(0)) {
+                // decrease old representative
+                uint32 srcRepNum = numCheckpoints[srcRep];
+                uint256 srcRepOld = srcRepNum > 0
+                    ? checkpoints[srcRep][srcRepNum - 1].votes
+                    : 0;
+                uint256 srcRepNew = srcRepOld.sub(amount);
+                _writeCheckpoint(srcRep, srcRepNum, srcRepOld, srcRepNew);
+            }
+
+            if (dstRep != address(0)) {
+                // increase new representative
+                uint32 dstRepNum = numCheckpoints[dstRep];
+                uint256 dstRepOld = dstRepNum > 0
+                    ? checkpoints[dstRep][dstRepNum - 1].votes
+                    : 0;
+                uint256 dstRepNew = dstRepOld.add(amount);
+                _writeCheckpoint(dstRep, dstRepNum, dstRepOld, dstRepNew);
+            }
+        }
+    }
+
+    function _writeCheckpoint(
+        address delegatee,
+        uint32 nCheckpoints,
+        uint256 oldVotes,
+        uint256 newVotes
+    ) internal {
+        uint32 blockNumber = safe32(
+            block.number,
+            "CAKE::_writeCheckpoint: block number exceeds 32 bits"
+        );
+
+        if (
+            nCheckpoints > 0 &&
+            checkpoints[delegatee][nCheckpoints - 1].fromBlock == blockNumber
+        ) {
+            checkpoints[delegatee][nCheckpoints - 1].votes = newVotes;
+        } else {
+            checkpoints[delegatee][nCheckpoints] = Checkpoint(
+                blockNumber,
+                newVotes
+            );
+            numCheckpoints[delegatee] = nCheckpoints + 1;
+        }
+
+        emit DelegateVotesChanged(delegatee, oldVotes, newVotes);
+    }
+
+    function safe32(uint256 n, string memory errorMessage)
+        internal
+        pure
+        returns (uint32)
+    {
+        require(n < 2**32, errorMessage);
+        return uint32(n);
+    }
+
+    function getChainId() internal pure returns (uint256) {
+        uint256 chainId;
+        assembly {
+            chainId := chainid()
+        }
+        return chainId;
+    }
+}
+
+// import "@nomiclabs/buidler/console.sol";
+interface IMigratorChef {
+    // Perform LP token migration from legacy PancakeSwap to CakeSwap.
+    // Take the current LP token address and return the new LP token address.
+    // Migrator should have full access to the caller's LP token.
+    // Return the new LP token address.
+    //
+    // XXX Migrator must have allowance access to PancakeSwap LP tokens.
+    // CakeSwap must mint EXACTLY the same amount of CakeSwap LP tokens or
+    // else something bad will happen. Traditional PancakeSwap does not
+    // do that so be careful!
+    function migrate(IBEP20 token) external returns (IBEP20);
+}
+
+// MasterChef is the master of Cake. He can make Cake and he is a fair guy.
 //
 // Note that it's ownable and the owner wields tremendous power. The ownership
-// will be transferred to a governance smart contract once REDB is sufficiently
+// will be transferred to a governance smart contract once CAKE is sufficiently
 // distributed and the community can show to govern itself.
 //
 // Have fun reading it. Hopefully it's bug-free. God bless.
@@ -1479,15 +1629,14 @@ contract MasterChef is Ownable {
     struct UserInfo {
         uint256 amount; // How many LP tokens the user has provided.
         uint256 rewardDebt; // Reward debt. See explanation below.
-        uint256 depositeTime;
         //
-        // We do some fancy math here. Basically, any point in time, the amount of REDBs
+        // We do some fancy math here. Basically, any point in time, the amount of CAKEs
         // entitled to a user but is pending to be distributed is:
         //
-        //   pending reward = (user.amount * pool.accRedBerryPerShare) - user.rewardDebt
+        //   pending reward = (user.amount * pool.accCakePerShare) - user.rewardDebt
         //
         // Whenever a user deposits or withdraws LP tokens to a pool. Here's what happens:
-        //   1. The pool's `accRedBerryPerShare` (and `lastRewardBlock`) gets updated.
+        //   1. The pool's `accCakePerShare` (and `lastRewardBlock`) gets updated.
         //   2. User receives the pending reward sent to his/her address.
         //   3. User's `amount` gets updated.
         //   4. User's `rewardDebt` gets updated.
@@ -1496,42 +1645,32 @@ contract MasterChef is Ownable {
     // Info of each pool.
     struct PoolInfo {
         IBEP20 lpToken; // Address of LP token contract.
-        uint256 allocPoint; // How many allocation points assigned to this pool. REDBs to distribute per block.
-        uint256 lastRewardBlock; // Last block number that REDBs distribution occurs.
-        uint256 accRedBerryPerShare; // Accumulated REDBs per share, times 1e12. See below.
-        uint16 depositFeeBP; // Deposit fee in basis points
+        uint256 allocPoint; // How many allocation points assigned to this pool. CAKEs to distribute per block.
+        uint256 lastRewardBlock; // Last block number that CAKEs distribution occurs.
+        uint256 accCakePerShare; // Accumulated CAKEs per share, times 1e12. See below.
     }
 
-    // The RedBerry TOKEN!
-    RedBerryToken public RedBerry;
+    // The CAKE TOKEN!
+    CakeToken public cake;
+    // The SYRUP TOKEN!
+    SyrupBar public syrup;
     // Dev address.
     address public devaddr;
-    // REDB tokens created per block.
-    uint256 public redBerryPerBlock;
-    // Bonus muliplier for early redBerry makers.
+    // CAKE tokens created per block.
+    uint256 public cakePerBlock;
+    // Bonus muliplier for early cake makers.
     uint256 public BONUS_MULTIPLIER = 1;
-    // Deposit Fee address
-    address public feeAddress;
+    // The migrator contract. It has a lot of power. Can only be set through governance (owner).
+    IMigratorChef public migrator;
 
     // Info of each pool.
     PoolInfo[] public poolInfo;
     // Info of each user that stakes LP tokens.
     mapping(uint256 => mapping(address => UserInfo)) public userInfo;
-    // Total allocation points. Must be the sum of all allocation points in all pools.
+    // Total allocation poitns. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint = 0;
-    // The block number when REDB mining starts.
+    // The block number when CAKE mining starts.
     uint256 public startBlock;
-    // stop time between deosite and widrow depault 8 Days
-    uint256 public HarvestLockup = 691200;
-
-    // Referral commission rate in basis points.
-    uint16 public referralCommissionRateForAll = 100;
-    uint16 public referralCommissionRateForNew = 200;
-    uint256 public timeForSetNewCommissionRate = 0;
-    // Max referral commission rate: 10%.
-    // uint16 public constant MAXIMUM_REFERRAL_COMMISSION_RATE = 1000;
-
-    IRedBerryReferral public redBerryReferral;
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
@@ -1542,29 +1681,33 @@ contract MasterChef is Ownable {
     );
 
     constructor(
-        RedBerryToken _redBerry,
+        CakeToken _cake,
+        SyrupBar _syrup,
         address _devaddr,
-        address _feeAddress,
-        uint256 _redBerryPerBlock,
-        uint256 _startBlock,
-        uint16 _depositFeeBP
-    ) {
-        RedBerry = _redBerry;
+        uint256 _cakePerBlock,
+        uint256 _startBlock
+    ) public {
+        cake = _cake;
+        syrup = _syrup;
         devaddr = _devaddr;
-        feeAddress = _feeAddress;
-        redBerryPerBlock = _redBerryPerBlock;
+        cakePerBlock = _cakePerBlock;
         startBlock = _startBlock;
 
+        // staking pool
         poolInfo.push(
             PoolInfo({
-                lpToken: _redBerry,
+                lpToken: _cake,
                 allocPoint: 1000,
-                lastRewardBlock: _startBlock,
-                accRedBerryPerShare: 0,
-                depositFeeBP: _depositFeeBP
+                lastRewardBlock: startBlock,
+                accCakePerShare: 0
             })
         );
+
         totalAllocPoint = 1000;
+    }
+
+    function updateMultiplier(uint256 multiplierNumber) public onlyOwner {
+        BONUS_MULTIPLIER = multiplierNumber;
     }
 
     function poolLength() external view returns (uint256) {
@@ -1576,13 +1719,8 @@ contract MasterChef is Ownable {
     function add(
         uint256 _allocPoint,
         IBEP20 _lpToken,
-        uint16 _depositFeeBP,
         bool _withUpdate
     ) public onlyOwner {
-        require(
-            _depositFeeBP <= 10000,
-            "add: invalid deposit fee basis points"
-        );
         if (_withUpdate) {
             massUpdatePools();
         }
@@ -1595,31 +1733,61 @@ contract MasterChef is Ownable {
                 lpToken: _lpToken,
                 allocPoint: _allocPoint,
                 lastRewardBlock: lastRewardBlock,
-                accRedBerryPerShare: 0,
-                depositFeeBP: _depositFeeBP
+                accCakePerShare: 0
             })
         );
+        updateStakingPool();
     }
 
-    // Update the given pool's REDB allocation point and deposit fee. Can only be called by the owner.
+    // Update the given pool's CAKE allocation point. Can only be called by the owner.
     function set(
         uint256 _pid,
         uint256 _allocPoint,
-        uint16 _depositFeeBP,
         bool _withUpdate
     ) public onlyOwner {
-        require(
-            _depositFeeBP <= 10000,
-            "set: invalid deposit fee basis points"
-        );
         if (_withUpdate) {
             massUpdatePools();
         }
         totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(
             _allocPoint
         );
+        uint256 prevAllocPoint = poolInfo[_pid].allocPoint;
         poolInfo[_pid].allocPoint = _allocPoint;
-        poolInfo[_pid].depositFeeBP = _depositFeeBP;
+        if (prevAllocPoint != _allocPoint) {
+            updateStakingPool();
+        }
+    }
+
+    function updateStakingPool() internal {
+        uint256 length = poolInfo.length;
+        uint256 points = 0;
+        for (uint256 pid = 1; pid < length; ++pid) {
+            points = points.add(poolInfo[pid].allocPoint);
+        }
+        if (points != 0) {
+            points = points.div(3);
+            totalAllocPoint = totalAllocPoint.sub(poolInfo[0].allocPoint).add(
+                points
+            );
+            poolInfo[0].allocPoint = points;
+        }
+    }
+
+    // Set the migrator contract. Can only be called by the owner.
+    function setMigrator(IMigratorChef _migrator) public onlyOwner {
+        migrator = _migrator;
+    }
+
+    // Migrate lp token to another lp contract. Can be called by anyone. We trust that migrator contract is good.
+    function migrate(uint256 _pid) public {
+        require(address(migrator) != address(0), "migrate: no migrator");
+        PoolInfo storage pool = poolInfo[_pid];
+        IBEP20 lpToken = pool.lpToken;
+        uint256 bal = lpToken.balanceOf(address(this));
+        lpToken.safeApprove(address(migrator), bal);
+        IBEP20 newLpToken = migrator.migrate(lpToken);
+        require(bal == newLpToken.balanceOf(address(this)), "migrate: bad");
+        pool.lpToken = newLpToken;
     }
 
     // Return reward multiplier over the given _from to _to block.
@@ -1631,35 +1799,30 @@ contract MasterChef is Ownable {
         return _to.sub(_from).mul(BONUS_MULTIPLIER);
     }
 
-    function updateMultiplier(uint256 multiplierNumber) public onlyOwner {
-        BONUS_MULTIPLIER = multiplierNumber;
-    }
-
-    // View function to see pending redBerrys on frontend.
-    function pendingRedBerry(uint256 _pid, address _user)
+    // View function to see pending CAKEs on frontend.
+    function pendingCake(uint256 _pid, address _user)
         external
         view
         returns (uint256)
     {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
-        uint256 accRedBerryPerShare = pool.accRedBerryPerShare;
+        uint256 accCakePerShare = pool.accCakePerShare;
         uint256 lpSupply = pool.lpToken.balanceOf(address(this));
         if (block.number > pool.lastRewardBlock && lpSupply != 0) {
             uint256 multiplier = getMultiplier(
                 pool.lastRewardBlock,
                 block.number
             );
-            uint256 redBerryReward = multiplier
-            .mul(redBerryPerBlock)
+            uint256 cakeReward = multiplier
+            .mul(cakePerBlock)
             .mul(pool.allocPoint)
             .div(totalAllocPoint);
-            accRedBerryPerShare = accRedBerryPerShare.add(
-                redBerryReward.mul(1e12).div(lpSupply)
+            accCakePerShare = accCakePerShare.add(
+                cakeReward.mul(1e12).div(lpSupply)
             );
         }
-        return
-            user.amount.mul(accRedBerryPerShare).div(1e12).sub(user.rewardDebt);
+        return user.amount.mul(accCakePerShare).div(1e12).sub(user.rewardDebt);
     }
 
     // Update reward variables for all pools. Be careful of gas spending!
@@ -1677,54 +1840,39 @@ contract MasterChef is Ownable {
             return;
         }
         uint256 lpSupply = pool.lpToken.balanceOf(address(this));
-        if (lpSupply == 0 || pool.allocPoint == 0) {
+        if (lpSupply == 0) {
             pool.lastRewardBlock = block.number;
             return;
         }
         uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-        uint256 redBerryReward = multiplier
-        .mul(redBerryPerBlock)
+        uint256 cakeReward = multiplier
+        .mul(cakePerBlock)
         .mul(pool.allocPoint)
         .div(totalAllocPoint);
-        RedBerry.mint(devaddr, redBerryReward.div(10));
-        RedBerry.mint(address(this), redBerryReward);
-        pool.accRedBerryPerShare = pool.accRedBerryPerShare.add(
-            redBerryReward.mul(1e12).div(lpSupply)
+        cake.mint(devaddr, cakeReward.div(10));
+        cake.mint(address(syrup), cakeReward);
+        pool.accCakePerShare = pool.accCakePerShare.add(
+            cakeReward.mul(1e12).div(lpSupply)
         );
         pool.lastRewardBlock = block.number;
     }
 
-    // Deposit LP tokens to MasterChef for REDB allocation.
-    function deposit(
-        uint256 _pid,
-        uint256 _amount,
-        address _referrer
-    ) public {
+    // Deposit LP tokens to MasterChef for CAKE allocation.
+    function deposit(uint256 _pid, uint256 _amount) public {
+        require(_pid != 0, "deposit CAKE by staking");
+
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
-
-        if (
-            _amount > 0 &&
-            address(redBerryReferral) != address(0) &&
-            _referrer != address(0) &&
-            _referrer != msg.sender &&
-            user.amount == 0
-        ) {
-            redBerryReferral.recordReferral(msg.sender, _referrer);
-        }
-        payOrLockupPendingredb(_pid);
         if (user.amount > 0) {
             uint256 pending = user
             .amount
-            .mul(pool.accRedBerryPerShare)
+            .mul(pool.accCakePerShare)
             .div(1e12)
             .sub(user.rewardDebt);
             if (pending > 0) {
-                safeRedBerryTransfer(msg.sender, pending);
+                safeCakeTransfer(msg.sender, pending);
             }
-        } else {
-            user.depositeTime = block.timestamp;
         }
         if (_amount > 0) {
             pool.lpToken.safeTransferFrom(
@@ -1732,161 +1880,103 @@ contract MasterChef is Ownable {
                 address(this),
                 _amount
             );
-            if (pool.depositFeeBP > 0) {
-                uint256 depositFee = _amount.mul(pool.depositFeeBP).div(10000);
-                pool.lpToken.safeTransfer(feeAddress, depositFee);
-                user.amount = user.amount.add(_amount).sub(depositFee);
-            } else {
-                user.amount = user.amount.add(_amount);
-            }
+            user.amount = user.amount.add(_amount);
         }
-        user.rewardDebt = user.amount.mul(pool.accRedBerryPerShare).div(1e12);
+        user.rewardDebt = user.amount.mul(pool.accCakePerShare).div(1e12);
         emit Deposit(msg.sender, _pid, _amount);
     }
 
     // Withdraw LP tokens from MasterChef.
     function withdraw(uint256 _pid, uint256 _amount) public {
+        require(_pid != 0, "withdraw CAKE by unstaking");
+
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
-        require(
-            block.timestamp > user.depositeTime.add(HarvestLockup),
-            "deposite time is lase then required"
-        );
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(_pid);
-        payOrLockupPendingredb(_pid);
-        uint256 pending = user
-        .amount
-        .mul(pool.accRedBerryPerShare)
-        .div(1e12)
-        .sub(user.rewardDebt);
+        uint256 pending = user.amount.mul(pool.accCakePerShare).div(1e12).sub(
+            user.rewardDebt
+        );
         if (pending > 0) {
-            safeRedBerryTransfer(msg.sender, pending);
+            safeCakeTransfer(msg.sender, pending);
         }
         if (_amount > 0) {
             user.amount = user.amount.sub(_amount);
             pool.lpToken.safeTransfer(address(msg.sender), _amount);
         }
-        user.rewardDebt = user.amount.mul(pool.accRedBerryPerShare).div(1e12);
+        user.rewardDebt = user.amount.mul(pool.accCakePerShare).div(1e12);
         emit Withdraw(msg.sender, _pid, _amount);
+    }
+
+    // Stake CAKE tokens to MasterChef
+    function enterStaking(uint256 _amount) public {
+        PoolInfo storage pool = poolInfo[0];
+        UserInfo storage user = userInfo[0][msg.sender];
+        updatePool(0);
+        if (user.amount > 0) {
+            uint256 pending = user
+            .amount
+            .mul(pool.accCakePerShare)
+            .div(1e12)
+            .sub(user.rewardDebt);
+            if (pending > 0) {
+                safeCakeTransfer(msg.sender, pending);
+            }
+        }
+        if (_amount > 0) {
+            pool.lpToken.safeTransferFrom(
+                address(msg.sender),
+                address(this),
+                _amount
+            );
+            user.amount = user.amount.add(_amount);
+        }
+        user.rewardDebt = user.amount.mul(pool.accCakePerShare).div(1e12);
+
+        syrup.mint(msg.sender, _amount);
+        emit Deposit(msg.sender, 0, _amount);
+    }
+
+    // Withdraw CAKE tokens from STAKING.
+    function leaveStaking(uint256 _amount) public {
+        PoolInfo storage pool = poolInfo[0];
+        UserInfo storage user = userInfo[0][msg.sender];
+        require(user.amount >= _amount, "withdraw: not good");
+        updatePool(0);
+        uint256 pending = user.amount.mul(pool.accCakePerShare).div(1e12).sub(
+            user.rewardDebt
+        );
+        if (pending > 0) {
+            safeCakeTransfer(msg.sender, pending);
+        }
+        if (_amount > 0) {
+            user.amount = user.amount.sub(_amount);
+            pool.lpToken.safeTransfer(address(msg.sender), _amount);
+        }
+        user.rewardDebt = user.amount.mul(pool.accCakePerShare).div(1e12);
+
+        syrup.burn(msg.sender, _amount);
+        emit Withdraw(msg.sender, 0, _amount);
     }
 
     // Withdraw without caring about rewards. EMERGENCY ONLY.
     function emergencyWithdraw(uint256 _pid) public {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
-        uint256 amount = user.amount;
+        pool.lpToken.safeTransfer(address(msg.sender), user.amount);
+        emit EmergencyWithdraw(msg.sender, _pid, user.amount);
         user.amount = 0;
         user.rewardDebt = 0;
-        pool.lpToken.safeTransfer(address(msg.sender), amount);
-        emit EmergencyWithdraw(msg.sender, _pid, amount);
     }
 
-    // Safe redBerry transfer function, just in case if rounding error causes pool to not have enough REDBs.
-    function safeRedBerryTransfer(address _to, uint256 _amount) internal {
-        uint256 RedBerryBal = RedBerry.balanceOf(address(this));
-        if (_amount > RedBerryBal) {
-            RedBerry.transfer(_to, RedBerryBal);
-        } else {
-            RedBerry.transfer(_to, RedBerryBal);
-        }
+    // Safe cake transfer function, just in case if rounding error causes pool to not have enough CAKEs.
+    function safeCakeTransfer(address _to, uint256 _amount) internal {
+        syrup.safeCakeTransfer(_to, _amount);
     }
 
     // Update dev address by the previous dev.
     function dev(address _devaddr) public {
         require(msg.sender == devaddr, "dev: wut?");
         devaddr = _devaddr;
-    }
-
-    function setFeeAddress(address _feeAddress) public {
-        require(msg.sender == feeAddress, "setFeeAddress: FORBIDDEN");
-        feeAddress = _feeAddress;
-    }
-
-    //Pancake has to add hidden dummy pools inorder to alter the emission, here we make it simple and transparent to all.
-    function updateEmissionRate(uint256 _redBerryPerBlock) public onlyOwner {
-        massUpdatePools();
-        redBerryPerBlock = _redBerryPerBlock;
-    }
-
-    function updateHarvestLookupTime(uint256 _time) public onlyOwner {
-        HarvestLockup = _time;
-    }
-
-    // Update the redBerry referral contract address by the owner
-    function setRedBerryReferral(IRedBerryReferral _redBerryReferral)
-        public
-        onlyOwner
-    {
-        redBerryReferral = _redBerryReferral;
-    }
-
-    function payOrLockupPendingredb(uint256 _pid) internal {
-        PoolInfo storage pool = poolInfo[_pid];
-        UserInfo storage user = userInfo[_pid][msg.sender];
-
-        uint256 pending = user
-        .amount
-        .mul(pool.accRedBerryPerShare)
-        .div(1e12)
-        .sub(user.rewardDebt);
-        if (pending > 0) {
-            payReferralCommission(msg.sender, pending, user.depositeTime);
-        }
-    }
-
-    function setNewReferralCommissionRate(uint16 _commitionRate)
-        public
-        onlyOwner
-    {
-        referralCommissionRateForNew = _commitionRate;
-        timeForSetNewCommissionRate = block.timestamp;
-    }
-
-    function setTimeForNewReferralCommissionRate(uint256 _time)
-        public
-        onlyOwner
-    {
-        timeForSetNewCommissionRate = _time;
-    }
-
-    function setAllReferralCommissionRate(uint16 _commitionRate)
-        public
-        onlyOwner
-    {
-        referralCommissionRateForAll = _commitionRate;
-    }
-
-    function payReferralCommission(
-        address _user,
-        uint256 _pending,
-        uint256 _depositeTime
-    ) internal {
-        uint256 referralCommissionRate;
-        if (
-            timeForSetNewCommissionRate > 0 &&
-            _depositeTime > timeForSetNewCommissionRate
-        ) {
-            referralCommissionRate = referralCommissionRateForNew;
-        } else {
-            referralCommissionRate = referralCommissionRateForAll;
-        }
-        if (
-            address(redBerryReferral) != address(0) &&
-            referralCommissionRate > 0
-        ) {
-            address referrer = redBerryReferral.getReferrer(_user);
-            uint256 commissionAmount = _pending.mul(referralCommissionRate).div(
-                10000
-            );
-
-            if (referrer != address(0) && commissionAmount > 0) {
-                RedBerry.mint(referrer, commissionAmount);
-                redBerryReferral.recordReferralCommission(
-                    referrer,
-                    commissionAmount
-                );
-            }
-        }
     }
 }

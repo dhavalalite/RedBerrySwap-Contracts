@@ -8,3 +8,10 @@
 
     -Cake Token : https://bscscan.com/address/0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82#code
     -Masterchef : https://bscscan.com/address/0x73feaa1ee314f8c655e354234017be2193c9e24e#code
+
+Steps To deploy :
+
+-   deploy factory from core folder
+-   deploy weth or using existing weth of any testnet
+-   deploy router contract
+-   call addLiquidity function where you need to pass token adderess(you can use existing erc20 tokens need to approve router contract)

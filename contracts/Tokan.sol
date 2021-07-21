@@ -52,7 +52,7 @@ contract Ownable is Context {
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
-    constructor()  {
+    constructor() {
         address msgSender = _msgSender();
         _owner = msgSender;
         emit OwnershipTransferred(address(0), msgSender);
@@ -930,11 +930,113 @@ contract BEP20 is Context, IBEP20, Ownable {
 }
 
 // RedBerry with Governance.
-contract RedBerry is BEP20("RedBerry", "REDB") {
+contract RedBerry is BEP20 {
+    // Transfer tax rate in basis points. (default 5%)
+    uint16 public transferTaxRate = 500;
+    // Burn rate % of transfer tax. (default 20% x 5% = 1% of total amount).
+    uint16 public burnRate = 20;
+    // Max transfer tax rate: 10%.
+    uint16 public constant MAXIMUM_TRANSFER_TAX_RATE = 1000;
+    // Burn address
+    address public constant BURN_ADDRESS =
+        0x000000000000000000000000000000000000dEaD;
+
+    // The operator can only update the transfer tax rate
+    address private _operator;
+
+    // Max transfer amount rate in basis points. (default is 0.5% of total supply)
+    uint16 public maxTransferAmountRate = 50;
+
+    event OperatorTransferred(
+        address indexed previousOperator,
+        address indexed newOperator
+    );
+    event TransferTaxRateUpdated(
+        address indexed operator,
+        uint256 previousRate,
+        uint256 newRate
+    );
+    event BurnRateUpdated(
+        address indexed operator,
+        uint256 previousRate,
+        uint256 newRate
+    );
+    event MaxTransferAmountRateUpdated(
+        address indexed operator,
+        uint256 previousRate,
+        uint256 newRate
+    );
+
+    modifier onlyOperator() {
+        require(
+            _operator == msg.sender,
+            "operator: caller is not the operator"
+        );
+        _;
+    }
+
+    constructor() BEP20("RedBerry", "REDB") {
+        _operator = _msgSender();
+        emit OperatorTransferred(address(0), _operator);
+    }
+
     /// @notice Creates `_amount` token to `_to`. Must only be called by the owner (MasterChef).
     function mint(address _to, uint256 _amount) public onlyOwner {
         _mint(_to, _amount);
         _moveDelegates(address(0), _delegates[_to], _amount);
+    }
+
+    /**
+     * @dev Update the transfer tax rate.
+     * Can only be called by the current operator.
+     */
+    function updateTransferTaxRate(uint16 _transferTaxRate)
+        public
+        onlyOperator
+    {
+        require(
+            _transferTaxRate <= MAXIMUM_TRANSFER_TAX_RATE,
+            "PANTHER::updateTransferTaxRate: Transfer tax rate must not exceed the maximum rate."
+        );
+        emit TransferTaxRateUpdated(
+            msg.sender,
+            transferTaxRate,
+            _transferTaxRate
+        );
+        transferTaxRate = _transferTaxRate;
+    }
+
+    /**
+     * @dev Update the burn rate.
+     * Can only be called by the current operator.
+     */
+    function updateBurnRate(uint16 _burnRate) public onlyOperator {
+        require(
+            _burnRate <= 100,
+            "PANTHER::updateBurnRate: Burn rate must not exceed the maximum rate."
+        );
+        emit BurnRateUpdated(msg.sender, burnRate, _burnRate);
+        burnRate = _burnRate;
+    }
+
+    /**
+     * @dev Update the max transfer amount rate.
+     * Can only be called by the current operator.
+     */
+    function updateMaxTransferAmountRate(uint16 _maxTransferAmountRate)
+        public
+        onlyOperator
+    {
+        require(
+            _maxTransferAmountRate <= 10000,
+            "PANTHER::updateMaxTransferAmountRate: Max transfer amount rate must not exceed the maximum rate."
+        );
+        emit MaxTransferAmountRateUpdated(
+            msg.sender,
+            maxTransferAmountRate,
+            _maxTransferAmountRate
+        );
+        maxTransferAmountRate = _maxTransferAmountRate;
     }
 
     // Copied and modified from YAM code:
@@ -1044,7 +1146,10 @@ contract RedBerry is BEP20("RedBerry", "REDB") {
             nonce == nonces[signatory]++,
             "REDB::delegateBySig: invalid nonce"
         );
-        require(block.timestamp <= expiry, "REDB::delegateBySig: signature expired");
+        require(
+            block.timestamp <= expiry,
+            "REDB::delegateBySig: signature expired"
+        );
         return _delegate(signatory, delegatee);
     }
 

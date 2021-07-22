@@ -687,6 +687,7 @@ contract BEP20 is Context, IBEP20, Ownable {
     function transfer(address recipient, uint256 amount)
         public
         override
+        virtual
         returns (bool)
     {
         _transfer(_msgSender(), recipient, amount);
@@ -935,8 +936,6 @@ contract RedBerry is BEP20 {
     uint16 public transferTaxRate = 500;
     // Burn rate % of transfer tax. (default 20% x 5% = 1% of total amount).
     uint16 public burnRate = 20;
-    // Max transfer tax rate: 10%.
-    uint16 public constant MAXIMUM_TRANSFER_TAX_RATE = 1000;
     // Burn address
     address public constant BURN_ADDRESS =
         0x000000000000000000000000000000000000dEaD;
@@ -946,7 +945,7 @@ contract RedBerry is BEP20 {
 
     // Max transfer amount rate in basis points. (default is 0.5% of total supply)
     uint16 public maxTransferAmountRate = 50;
-
+    
     event OperatorTransferred(
         address indexed previousOperator,
         address indexed newOperator
@@ -974,6 +973,13 @@ contract RedBerry is BEP20 {
         );
         _;
     }
+    
+    modifier antiWhale(address sender, address recipient, uint256 amount) {
+        if (maxTransferAmount() > 0) {
+            require(amount <= maxTransferAmount(), "REDBERRY::antiWhale: Transfer amount exceeds the maxTransferAmount");
+        }
+        _;
+    }
 
     constructor() BEP20("RedBerry", "REDB") {
         _operator = _msgSender();
@@ -985,25 +991,23 @@ contract RedBerry is BEP20 {
         _mint(_to, _amount);
         _moveDelegates(address(0), _delegates[_to], _amount);
     }
-
+    
     /**
-     * @dev Update the transfer tax rate.
-     * Can only be called by the current operator.
+     * @dev Returns the max transfer amount.
      */
-    function updateTransferTaxRate(uint16 _transferTaxRate)
+    function maxTransferAmount() public view returns (uint256) {
+        return (totalSupply() * maxTransferAmountRate)/(10000);
+    }
+    
+    function transfer(address recipient, uint256 amount)
         public
-        onlyOperator
+        override
+        virtual
+        antiWhale(msg.sender, recipient, amount)
+        returns (bool)
     {
-        require(
-            _transferTaxRate <= MAXIMUM_TRANSFER_TAX_RATE,
-            "PANTHER::updateTransferTaxRate: Transfer tax rate must not exceed the maximum rate."
-        );
-        emit TransferTaxRateUpdated(
-            msg.sender,
-            transferTaxRate,
-            _transferTaxRate
-        );
-        transferTaxRate = _transferTaxRate;
+        _transfer(_msgSender(), recipient, amount);
+        return true;
     }
 
     /**
@@ -1013,7 +1017,7 @@ contract RedBerry is BEP20 {
     function updateBurnRate(uint16 _burnRate) public onlyOperator {
         require(
             _burnRate <= 100,
-            "PANTHER::updateBurnRate: Burn rate must not exceed the maximum rate."
+            "REDBERRY::updateBurnRate: Burn rate must not exceed the maximum rate."
         );
         emit BurnRateUpdated(msg.sender, burnRate, _burnRate);
         burnRate = _burnRate;
@@ -1023,22 +1027,12 @@ contract RedBerry is BEP20 {
      * @dev Update the max transfer amount rate.
      * Can only be called by the current operator.
      */
-    function updateMaxTransferAmountRate(uint16 _maxTransferAmountRate)
-        public
-        onlyOperator
-    {
-        require(
-            _maxTransferAmountRate <= 10000,
-            "PANTHER::updateMaxTransferAmountRate: Max transfer amount rate must not exceed the maximum rate."
-        );
-        emit MaxTransferAmountRateUpdated(
-            msg.sender,
-            maxTransferAmountRate,
-            _maxTransferAmountRate
-        );
+    function updateMaxTransferAmountRate(uint16 _maxTransferAmountRate) public onlyOperator {
+        require(_maxTransferAmountRate <= 10000, "REDBERRY::updateMaxTransferAmountRate: Max transfer amount rate must not exceed the maximum rate.");
+        emit MaxTransferAmountRateUpdated(msg.sender, maxTransferAmountRate, _maxTransferAmountRate);
         maxTransferAmountRate = _maxTransferAmountRate;
     }
-
+    
     // Copied and modified from YAM code:
     // https://github.com/yam-finance/yam-protocol/blob/master/contracts/token/YAMGovernanceStorage.sol
     // https://github.com/yam-finance/yam-protocol/blob/master/contracts/token/YAMGovernance.sol

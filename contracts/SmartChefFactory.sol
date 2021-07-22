@@ -924,10 +924,10 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
     // Accrued token per share
     uint256 public accTokenPerShare;
 
-    // The block number when CAKE mining ends.
+    // The block number when REDB mining ends.
     uint256 public bonusEndBlock;
 
-    // The block number when CAKE mining starts.
+    // The block number when REDB mining starts.
     uint256 public startBlock;
 
     // The block number of the last pool update
@@ -936,7 +936,7 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
     // The pool limit (0 if none)
     uint256 public poolLimitPerUser;
 
-    // CAKE tokens created per block.
+    // REDB tokens created per block.
     uint256 public rewardPerBlock;
 
     // The precision factor
@@ -1223,9 +1223,9 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
         uint256 stakedTokenSupply = stakedToken.balanceOf(address(this));
         if (block.number > lastRewardBlock && stakedTokenSupply != 0) {
             uint256 multiplier = _getMultiplier(lastRewardBlock, block.number);
-            uint256 cakeReward = multiplier.mul(rewardPerBlock);
+            uint256 redbReward = multiplier.mul(rewardPerBlock);
             uint256 adjustedTokenPerShare = accTokenPerShare.add(
-                cakeReward.mul(PRECISION_FACTOR).div(stakedTokenSupply)
+                redbReward.mul(PRECISION_FACTOR).div(stakedTokenSupply)
             );
             return
                 user
@@ -1257,9 +1257,9 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
         }
 
         uint256 multiplier = _getMultiplier(lastRewardBlock, block.number);
-        uint256 cakeReward = multiplier.mul(rewardPerBlock);
+        uint256 redbReward = multiplier.mul(rewardPerBlock);
         accTokenPerShare = accTokenPerShare.add(
-            cakeReward.mul(PRECISION_FACTOR).div(stakedTokenSupply)
+            redbReward.mul(PRECISION_FACTOR).div(stakedTokenSupply)
         );
         lastRewardBlock = block.number;
     }

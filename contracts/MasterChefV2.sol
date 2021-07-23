@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.6;
 
+
+// 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
  * checks.
@@ -17,82 +19,6 @@ pragma solidity 0.8.6;
  */
 library SafeMath {
     /**
-     * @dev Returns the addition of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryAdd(uint256 a, uint256 b)
-        internal
-        pure
-        returns (bool, uint256)
-    {
-        uint256 c = a + b;
-        if (c < a) return (false, 0);
-        return (true, c);
-    }
-
-    /**
-     * @dev Returns the substraction of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
-    function trySub(uint256 a, uint256 b)
-        internal
-        pure
-        returns (bool, uint256)
-    {
-        if (b > a) return (false, 0);
-        return (true, a - b);
-    }
-
-    /**
-     * @dev Returns the multiplication of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryMul(uint256 a, uint256 b)
-        internal
-        pure
-        returns (bool, uint256)
-    {
-        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
-        // benefit is lost if 'b' is also tested.
-        // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
-        if (a == 0) return (true, 0);
-        uint256 c = a * b;
-        if (c / a != b) return (false, 0);
-        return (true, c);
-    }
-
-    /**
-     * @dev Returns the division of two unsigned integers, with a division by zero flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryDiv(uint256 a, uint256 b)
-        internal
-        pure
-        returns (bool, uint256)
-    {
-        if (b == 0) return (false, 0);
-        return (true, a / b);
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers, with a division by zero flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryMod(uint256 a, uint256 b)
-        internal
-        pure
-        returns (bool, uint256)
-    {
-        if (b == 0) return (false, 0);
-        return (true, a % b);
-    }
-
-    /**
      * @dev Returns the addition of two unsigned integers, reverting on
      * overflow.
      *
@@ -104,7 +30,8 @@ library SafeMath {
      */
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
-        require(c >= a, "SafeMath: addition overflow");
+        require(c >= a, 'SafeMath: addition overflow');
+
         return c;
     }
 
@@ -119,67 +46,12 @@ library SafeMath {
      * - Subtraction cannot overflow.
      */
     function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b <= a, "SafeMath: subtraction overflow");
-        return a - b;
-    }
-
-    /**
-     * @dev Returns the multiplication of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `*` operator.
-     *
-     * Requirements:
-     *
-     * - Multiplication cannot overflow.
-     */
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-        if (a == 0) return 0;
-        uint256 c = a * b;
-        require(c / a == b, "SafeMath: multiplication overflow");
-        return c;
-    }
-
-    /**
-     * @dev Returns the integer division of two unsigned integers, reverting on
-     * division by zero. The result is rounded towards zero.
-     *
-     * Counterpart to Solidity's `/` operator. Note: this function uses a
-     * `revert` opcode (which leaves remaining gas untouched) while Solidity
-     * uses an invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b > 0, "SafeMath: division by zero");
-        return a / b;
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * reverting when dividing by zero.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b > 0, "SafeMath: modulo by zero");
-        return a % b;
+        return sub(a, b, 'SafeMath: subtraction overflow');
     }
 
     /**
      * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
      * overflow (when the result is negative).
-     *
-     * CAUTION: This function is deprecated because it requires allocating memory for the error
-     * message unnecessarily. For custom revert reasons use {trySub}.
      *
      * Counterpart to Solidity's `-` operator.
      *
@@ -193,15 +65,54 @@ library SafeMath {
         string memory errorMessage
     ) internal pure returns (uint256) {
         require(b <= a, errorMessage);
-        return a - b;
+        uint256 c = a - b;
+
+        return c;
     }
 
     /**
-     * @dev Returns the integer division of two unsigned integers, reverting with custom message on
+     * @dev Returns the multiplication of two unsigned integers, reverting on
+     * overflow.
+     *
+     * Counterpart to Solidity's `*` operator.
+     *
+     * Requirements:
+     *
+     * - Multiplication cannot overflow.
+     */
+    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
+        // benefit is lost if 'b' is also tested.
+        // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
+        if (a == 0) {
+            return 0;
+        }
+
+        uint256 c = a * b;
+        require(c / a == b, 'SafeMath: multiplication overflow');
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the integer division of two unsigned integers. Reverts on
      * division by zero. The result is rounded towards zero.
      *
-     * CAUTION: This function is deprecated because it requires allocating memory for the error
-     * message unnecessarily. For custom revert reasons use {tryDiv}.
+     * Counterpart to Solidity's `/` operator. Note: this function uses a
+     * `revert` opcode (which leaves remaining gas untouched) while Solidity
+     * uses an invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     *
+     * - The divisor cannot be zero.
+     */
+    function div(uint256 a, uint256 b) internal pure returns (uint256) {
+        return div(a, b, 'SafeMath: division by zero');
+    }
+
+    /**
+     * @dev Returns the integer division of two unsigned integers. Reverts with custom message on
+     * division by zero. The result is rounded towards zero.
      *
      * Counterpart to Solidity's `/` operator. Note: this function uses a
      * `revert` opcode (which leaves remaining gas untouched) while Solidity
@@ -217,15 +128,31 @@ library SafeMath {
         string memory errorMessage
     ) internal pure returns (uint256) {
         require(b > 0, errorMessage);
-        return a / b;
+        uint256 c = a / b;
+        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+
+        return c;
     }
 
     /**
      * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * reverting with custom message when dividing by zero.
+     * Reverts when dividing by zero.
      *
-     * CAUTION: This function is deprecated because it requires allocating memory for the error
-     * message unnecessarily. For custom revert reasons use {tryMod}.
+     * Counterpart to Solidity's `%` operator. This function uses a `revert`
+     * opcode (which leaves remaining gas untouched) while Solidity uses an
+     * invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     *
+     * - The divisor cannot be zero.
+     */
+    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
+        return mod(a, b, 'SafeMath: modulo by zero');
+    }
+
+    /**
+     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+     * Reverts with custom message when dividing by zero.
      *
      * Counterpart to Solidity's `%` operator. This function uses a `revert`
      * opcode (which leaves remaining gas untouched) while Solidity uses an
@@ -240,13 +167,30 @@ library SafeMath {
         uint256 b,
         string memory errorMessage
     ) internal pure returns (uint256) {
-        require(b > 0, errorMessage);
+        require(b != 0, errorMessage);
         return a % b;
+    }
+
+    function min(uint256 x, uint256 y) internal pure returns (uint256 z) {
+        z = x < y ? x : y;
+    }
+
+    // babylonian method (https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Babylonian_method)
+    function sqrt(uint256 y) internal pure returns (uint256 z) {
+        if (y > 3) {
+            z = y;
+            uint256 x = y / 2 + 1;
+            while (x < z) {
+                z = x;
+                x = (y / x + x) / 2;
+            }
+        } else if (y != 0) {
+            z = 1;
+        }
     }
 }
 
-pragma solidity >=0.6.4;
-
+// 
 interface IBEP20 {
     /**
      * @dev Returns the amount of tokens in existence.
@@ -285,9 +229,7 @@ interface IBEP20 {
      *
      * Emits a {Transfer} event.
      */
-    function transfer(address recipient, uint256 amount)
-        external
-        returns (bool);
+    function transfer(address recipient, uint256 amount) external returns (bool);
 
     /**
      * @dev Returns the remaining number of tokens that `spender` will be
@@ -296,10 +238,7 @@ interface IBEP20 {
      *
      * This value changes when {approve} or {transferFrom} are called.
      */
-    function allowance(address _owner, address spender)
-        external
-        view
-        returns (uint256);
+    function allowance(address _owner, address spender) external view returns (uint256);
 
     /**
      * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
@@ -344,15 +283,10 @@ interface IBEP20 {
      * @dev Emitted when the allowance of a `spender` for an `owner` is set by
      * a call to {approve}. `value` is the new allowance.
      */
-    event Approval(
-        address indexed owner,
-        address indexed spender,
-        uint256 value
-    );
+    event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-pragma solidity 0.8.6;
-
+// 
 /**
  * @dev Collection of functions related to the address type
  */
@@ -375,16 +309,16 @@ library Address {
      * ====
      */
     function isContract(address account) internal view returns (bool) {
-        // This method relies on extcodesize, which returns 0 for contracts in
-        // construction, since the code is only stored at the end of the
-        // constructor execution.
-
-        uint256 size;
+        // According to EIP-1052, 0x0 is the value returned for not-yet created accounts
+        // and 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 is returned
+        // for accounts without code, i.e. `keccak256('')`
+        bytes32 codehash;
+        bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            size := extcodesize(account)
+            codehash := extcodehash(account)
         }
-        return size > 0;
+        return (codehash != accountHash && codehash != 0x0);
     }
 
     /**
@@ -404,17 +338,11 @@ library Address {
      * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].
      */
     function sendValue(address payable recipient, uint256 amount) internal {
-        require(
-            address(this).balance >= amount,
-            "Address: insufficient balance"
-        );
+        require(address(this).balance >= amount, 'Address: insufficient balance');
 
         // solhint-disable-next-line avoid-low-level-calls, avoid-call-value
-        (bool success, ) = recipient.call{value: amount}("");
-        require(
-            success,
-            "Address: unable to send value, recipient may have reverted"
-        );
+        (bool success, ) = recipient.call{value: amount}('');
+        require(success, 'Address: unable to send value, recipient may have reverted');
     }
 
     /**
@@ -435,11 +363,8 @@ library Address {
      *
      * _Available since v3.1._
      */
-    function functionCall(address target, bytes memory data)
-        internal
-        returns (bytes memory)
-    {
-        return functionCall(target, data, "Address: low-level call failed");
+    function functionCall(address target, bytes memory data) internal returns (bytes memory) {
+        return functionCall(target, data, 'Address: low-level call failed');
     }
 
     /**
@@ -453,7 +378,7 @@ library Address {
         bytes memory data,
         string memory errorMessage
     ) internal returns (bytes memory) {
-        return functionCallWithValue(target, data, 0, errorMessage);
+        return _functionCallWithValue(target, data, 0, errorMessage);
     }
 
     /**
@@ -472,13 +397,7 @@ library Address {
         bytes memory data,
         uint256 value
     ) internal returns (bytes memory) {
-        return
-            functionCallWithValue(
-                target,
-                data,
-                value,
-                "Address: low-level call with value failed"
-            );
+        return functionCallWithValue(target, data, value, 'Address: low-level call with value failed');
     }
 
     /**
@@ -493,97 +412,20 @@ library Address {
         uint256 value,
         string memory errorMessage
     ) internal returns (bytes memory) {
-        require(
-            address(this).balance >= value,
-            "Address: insufficient balance for call"
-        );
-        require(isContract(target), "Address: call to non-contract");
-
-        // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = target.call{value: value}(
-            data
-        );
-        return _verifyCallResult(success, returndata, errorMessage);
+        require(address(this).balance >= value, 'Address: insufficient balance for call');
+        return _functionCallWithValue(target, data, value, errorMessage);
     }
 
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
-     * but performing a static call.
-     *
-     * _Available since v3.3._
-     */
-    function functionStaticCall(address target, bytes memory data)
-        internal
-        view
-        returns (bytes memory)
-    {
-        return
-            functionStaticCall(
-                target,
-                data,
-                "Address: low-level static call failed"
-            );
-    }
-
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],
-     * but performing a static call.
-     *
-     * _Available since v3.3._
-     */
-    function functionStaticCall(
+    function _functionCallWithValue(
         address target,
         bytes memory data,
+        uint256 weiValue,
         string memory errorMessage
-    ) internal view returns (bytes memory) {
-        require(isContract(target), "Address: static call to non-contract");
+    ) private returns (bytes memory) {
+        require(isContract(target), 'Address: call to non-contract');
 
         // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = target.staticcall(data);
-        return _verifyCallResult(success, returndata, errorMessage);
-    }
-
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
-     * but performing a delegate call.
-     *
-     * _Available since v3.4._
-     */
-    function functionDelegateCall(address target, bytes memory data)
-        internal
-        returns (bytes memory)
-    {
-        return
-            functionDelegateCall(
-                target,
-                data,
-                "Address: low-level delegate call failed"
-            );
-    }
-
-    /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],
-     * but performing a delegate call.
-     *
-     * _Available since v3.4._
-     */
-    function functionDelegateCall(
-        address target,
-        bytes memory data,
-        string memory errorMessage
-    ) internal returns (bytes memory) {
-        require(isContract(target), "Address: delegate call to non-contract");
-
-        // solhint-disable-next-line avoid-low-level-calls
-        (bool success, bytes memory returndata) = target.delegatecall(data);
-        return _verifyCallResult(success, returndata, errorMessage);
-    }
-
-    function _verifyCallResult(
-        bool success,
-        bytes memory returndata,
-        string memory errorMessage
-    ) private pure returns (bytes memory) {
+        (bool success, bytes memory returndata) = target.call{value: weiValue}(data);
         if (success) {
             return returndata;
         } else {
@@ -603,28 +445,7 @@ library Address {
     }
 }
 
-pragma solidity 0.8.6;
-
-interface IRedBerryReferral {
-    /**
-     * @dev Record referral.
-     */
-    function recordReferral(address user, address referrer) external;
-
-    /**
-     * @dev Record referral commission.
-     */
-    function recordReferralCommission(address referrer, uint256 commission)
-        external;
-
-    /**
-     * @dev Get the referrer address that referred the user.
-     */
-    function getReferrer(address user) external view returns (address);
-}
-
-pragma solidity 0.8.6;
-
+// 
 /**
  * @title SafeBEP20
  * @dev Wrappers around BEP20 operations that throw on failure (when the token
@@ -643,10 +464,7 @@ library SafeBEP20 {
         address to,
         uint256 value
     ) internal {
-        _callOptionalReturn(
-            token,
-            abi.encodeWithSelector(token.transfer.selector, to, value)
-        );
+        _callOptionalReturn(token, abi.encodeWithSelector(token.transfer.selector, to, value));
     }
 
     function safeTransferFrom(
@@ -655,10 +473,7 @@ library SafeBEP20 {
         address to,
         uint256 value
     ) internal {
-        _callOptionalReturn(
-            token,
-            abi.encodeWithSelector(token.transferFrom.selector, from, to, value)
-        );
+        _callOptionalReturn(token, abi.encodeWithSelector(token.transferFrom.selector, from, to, value));
     }
 
     /**
@@ -679,12 +494,9 @@ library SafeBEP20 {
         // solhint-disable-next-line max-line-length
         require(
             (value == 0) || (token.allowance(address(this), spender) == 0),
-            "SafeBEP20: approve from non-zero to non-zero allowance"
+            'SafeBEP20: approve from non-zero to non-zero allowance'
         );
-        _callOptionalReturn(
-            token,
-            abi.encodeWithSelector(token.approve.selector, spender, value)
-        );
+        _callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, value));
     }
 
     function safeIncreaseAllowance(
@@ -692,17 +504,8 @@ library SafeBEP20 {
         address spender,
         uint256 value
     ) internal {
-        uint256 newAllowance = token.allowance(address(this), spender).add(
-            value
-        );
-        _callOptionalReturn(
-            token,
-            abi.encodeWithSelector(
-                token.approve.selector,
-                spender,
-                newAllowance
-            )
-        );
+        uint256 newAllowance = token.allowance(address(this), spender).add(value);
+        _callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, newAllowance));
     }
 
     function safeDecreaseAllowance(
@@ -712,16 +515,9 @@ library SafeBEP20 {
     ) internal {
         uint256 newAllowance = token.allowance(address(this), spender).sub(
             value,
-            "SafeBEP20: decreased allowance below zero"
+            'SafeBEP20: decreased allowance below zero'
         );
-        _callOptionalReturn(
-            token,
-            abi.encodeWithSelector(
-                token.approve.selector,
-                spender,
-                newAllowance
-            )
-        );
+        _callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, newAllowance));
     }
 
     /**
@@ -735,23 +531,16 @@ library SafeBEP20 {
         // we're implementing it ourselves. We use {Address.functionCall} to perform this call, which verifies that
         // the target address contains contract code and also asserts for success in the low-level call.
 
-        bytes memory returndata = address(token).functionCall(
-            data,
-            "SafeBEP20: low-level call failed"
-        );
+        bytes memory returndata = address(token).functionCall(data, 'SafeBEP20: low-level call failed');
         if (returndata.length > 0) {
             // Return data is optional
             // solhint-disable-next-line max-line-length
-            require(
-                abi.decode(returndata, (bool)),
-                "SafeBEP20: BEP20 operation did not succeed"
-            );
+            require(abi.decode(returndata, (bool)), 'SafeBEP20: BEP20 operation did not succeed');
         }
     }
 }
 
-pragma solidity 0.8.6;
-
+// 
 /*
  * @dev Provides information about the current execution context, including the
  * sender of the transaction and its data. While these are generally available
@@ -762,19 +551,22 @@ pragma solidity 0.8.6;
  *
  * This contract is only required for intermediate, library-like contracts.
  */
-abstract contract Context {
-    function _msgSender() internal view virtual returns (address payable) {
+contract Context {
+    // Empty internal constructor, to prevent people from mistakenly deploying
+    // an instance of this contract, which should be used via inheritance.
+    constructor()  {}
+
+    function _msgSender() internal view returns (address payable) {
         return payable(msg.sender);
     }
 
-    function _msgData() internal view virtual returns (bytes memory) {
+    function _msgData() internal view returns (bytes memory) {
         this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
         return msg.data;
     }
 }
 
-pragma solidity 0.8.6;
-
+// 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
  * there is an account (an owner) that can be granted exclusive access to
@@ -787,13 +579,10 @@ pragma solidity 0.8.6;
  * `onlyOwner`, which can be applied to your functions to restrict their use to
  * the owner.
  */
-abstract contract Ownable is Context {
+contract Ownable is Context {
     address private _owner;
 
-    event OwnershipTransferred(
-        address indexed previousOwner,
-        address indexed newOwner
-    );
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
@@ -807,7 +596,7 @@ abstract contract Ownable is Context {
     /**
      * @dev Returns the address of the current owner.
      */
-    function owner() public view virtual returns (address) {
+    function owner() public view returns (address) {
         return _owner;
     }
 
@@ -815,7 +604,7 @@ abstract contract Ownable is Context {
      * @dev Throws if called by any account other than the owner.
      */
     modifier onlyOwner() {
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
+        require(_owner == _msgSender(), 'Ownable: caller is not the owner');
         _;
     }
 
@@ -826,7 +615,7 @@ abstract contract Ownable is Context {
      * NOTE: Renouncing ownership will leave the contract without an owner,
      * thereby removing any functionality that is only available to the owner.
      */
-    function renounceOwnership() public virtual onlyOwner {
+    function renounceOwnership() public onlyOwner {
         emit OwnershipTransferred(_owner, address(0));
         _owner = address(0);
     }
@@ -835,18 +624,21 @@ abstract contract Ownable is Context {
      * @dev Transfers ownership of the contract to a new account (`newOwner`).
      * Can only be called by the current owner.
      */
-    function transferOwnership(address newOwner) public virtual onlyOwner {
-        require(
-            newOwner != address(0),
-            "Ownable: new owner is the zero address"
-        );
+    function transferOwnership(address newOwner) public onlyOwner {
+        _transferOwnership(newOwner);
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     */
+    function _transferOwnership(address newOwner) internal {
+        require(newOwner != address(0), 'Ownable: new owner is the zero address');
         emit OwnershipTransferred(_owner, newOwner);
         _owner = newOwner;
     }
 }
 
-pragma solidity >=0.4.0;
-
+// 
 /**
  * @dev Implementation of the {IBEP20} interface.
  *
@@ -873,6 +665,7 @@ pragma solidity >=0.4.0;
  */
 contract BEP20 is Context, IBEP20, Ownable {
     using SafeMath for uint256;
+    using Address for address;
 
     mapping(address => uint256) private _balances;
 
@@ -893,52 +686,51 @@ contract BEP20 is Context, IBEP20, Ownable {
      * All three of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(string memory Name, string memory Symbol) {
-        _name = Name;
-        _symbol = Symbol;
+    constructor(string memory __name, string memory __symbol) {
+        _name = __name;
+        _symbol = __symbol;
         _decimals = 18;
     }
 
     /**
      * @dev Returns the bep token owner.
      */
-    function getOwner() external view override returns (address) {
+    function getOwner() external override view returns (address) {
         return owner();
     }
 
     /**
-     * @dev Returns the name of the token.
+     * @dev Returns the token name.
      */
-    function name() public view override returns (string memory) {
+    function name() public override view returns (string memory) {
         return _name;
     }
 
     /**
-     * @dev Returns the symbol of the token, usually a shorter version of the
-     * name.
+     * @dev Returns the token decimals.
      */
-    function symbol() public view override returns (string memory) {
-        return _symbol;
+    function decimals() public override view returns (uint8) {
+        return _decimals;
     }
 
     /**
-     * @dev Returns the number of decimals used to get its user representation.
+     * @dev Returns the token symbol.
      */
-    function decimals() public view override returns (uint8) {
-        return _decimals;
+    function symbol() public override view returns (string memory) {
+        return _symbol;
     }
 
     /**
      * @dev See {BEP20-totalSupply}.
      */
-    function totalSupply() public view override returns (uint256) {
+    function totalSupply() public override view returns (uint256) {
         return _totalSupply;
     }
 
     /**
      * @dev See {BEP20-balanceOf}.
      */
-    function balanceOf(address account) public view override returns (uint256) {
+    function balanceOf(address account) public override view returns (uint256) {
         return _balances[account];
     }
 
@@ -950,11 +742,7 @@ contract BEP20 is Context, IBEP20, Ownable {
      * - `recipient` cannot be the zero address.
      * - the caller must have a balance of at least `amount`.
      */
-    function transfer(address recipient, uint256 amount)
-        public
-        override
-        returns (bool)
-    {
+    function transfer(address recipient, uint256 amount) public override returns (bool) {
         _transfer(_msgSender(), recipient, amount);
         return true;
     }
@@ -962,12 +750,7 @@ contract BEP20 is Context, IBEP20, Ownable {
     /**
      * @dev See {BEP20-allowance}.
      */
-    function allowance(address owner, address spender)
-        public
-        view
-        override
-        returns (uint256)
-    {
+    function allowance(address owner, address spender) public override view returns (uint256) {
         return _allowances[owner][spender];
     }
 
@@ -978,11 +761,7 @@ contract BEP20 is Context, IBEP20, Ownable {
      *
      * - `spender` cannot be the zero address.
      */
-    function approve(address spender, uint256 amount)
-        public
-        override
-        returns (bool)
-    {
+    function approve(address spender, uint256 amount) public override returns (bool) {
         _approve(_msgSender(), spender, amount);
         return true;
     }
@@ -1008,10 +787,7 @@ contract BEP20 is Context, IBEP20, Ownable {
         _approve(
             sender,
             _msgSender(),
-            _allowances[sender][_msgSender()].sub(
-                amount,
-                "BEP20: transfer amount exceeds allowance"
-            )
+            _allowances[sender][_msgSender()].sub(amount, 'BEP20: transfer amount exceeds allowance')
         );
         return true;
     }
@@ -1028,15 +804,8 @@ contract BEP20 is Context, IBEP20, Ownable {
      *
      * - `spender` cannot be the zero address.
      */
-    function increaseAllowance(address spender, uint256 addedValue)
-        public
-        returns (bool)
-    {
-        _approve(
-            _msgSender(),
-            spender,
-            _allowances[_msgSender()][spender].add(addedValue)
-        );
+    function increaseAllowance(address spender, uint256 addedValue) public returns (bool) {
+        _approve(_msgSender(), spender, _allowances[_msgSender()][spender].add(addedValue));
         return true;
     }
 
@@ -1054,17 +823,11 @@ contract BEP20 is Context, IBEP20, Ownable {
      * - `spender` must have allowance for the caller of at least
      * `subtractedValue`.
      */
-    function decreaseAllowance(address spender, uint256 subtractedValue)
-        public
-        returns (bool)
-    {
+    function decreaseAllowance(address spender, uint256 subtractedValue) public returns (bool) {
         _approve(
             _msgSender(),
             spender,
-            _allowances[_msgSender()][spender].sub(
-                subtractedValue,
-                "BEP20: decreased allowance below zero"
-            )
+            _allowances[_msgSender()][spender].sub(subtractedValue, 'BEP20: decreased allowance below zero')
         );
         return true;
     }
@@ -1101,13 +864,10 @@ contract BEP20 is Context, IBEP20, Ownable {
         address recipient,
         uint256 amount
     ) internal {
-        require(sender != address(0), "BEP20: transfer from the zero address");
-        require(recipient != address(0), "BEP20: transfer to the zero address");
+        require(sender != address(0), 'BEP20: transfer from the zero address');
+        require(recipient != address(0), 'BEP20: transfer to the zero address');
 
-        _balances[sender] = _balances[sender].sub(
-            amount,
-            "BEP20: transfer amount exceeds balance"
-        );
+        _balances[sender] = _balances[sender].sub(amount, 'BEP20: transfer amount exceeds balance');
         _balances[recipient] = _balances[recipient].add(amount);
         emit Transfer(sender, recipient, amount);
     }
@@ -1122,7 +882,7 @@ contract BEP20 is Context, IBEP20, Ownable {
      * - `to` cannot be the zero address.
      */
     function _mint(address account, uint256 amount) internal {
-        require(account != address(0), "BEP20: mint to the zero address");
+        require(account != address(0), 'BEP20: mint to the zero address');
 
         _totalSupply = _totalSupply.add(amount);
         _balances[account] = _balances[account].add(amount);
@@ -1141,12 +901,9 @@ contract BEP20 is Context, IBEP20, Ownable {
      * - `account` must have at least `amount` tokens.
      */
     function _burn(address account, uint256 amount) internal {
-        require(account != address(0), "BEP20: burn from the zero address");
+        require(account != address(0), 'BEP20: burn from the zero address');
 
-        _balances[account] = _balances[account].sub(
-            amount,
-            "BEP20: burn amount exceeds balance"
-        );
+        _balances[account] = _balances[account].sub(amount, 'BEP20: burn amount exceeds balance');
         _totalSupply = _totalSupply.sub(amount);
         emit Transfer(account, address(0), amount);
     }
@@ -1169,8 +926,8 @@ contract BEP20 is Context, IBEP20, Ownable {
         address spender,
         uint256 amount
     ) internal {
-        require(owner != address(0), "BEP20: approve from the zero address");
-        require(spender != address(0), "BEP20: approve to the zero address");
+        require(owner != address(0), 'BEP20: approve from the zero address');
+        require(spender != address(0), 'BEP20: approve to the zero address');
 
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
@@ -1187,18 +944,13 @@ contract BEP20 is Context, IBEP20, Ownable {
         _approve(
             account,
             _msgSender(),
-            _allowances[account][_msgSender()].sub(
-                amount,
-                "BEP20: burn amount exceeds allowance"
-            )
+            _allowances[account][_msgSender()].sub(amount, 'BEP20: burn amount exceeds allowance')
         );
     }
 }
 
-pragma solidity 0.8.6;
-
 // RedBerryToken with Governance.
-contract RedBerryToken is BEP20("RedBerry", "REDB") {
+contract RedBerryToken is BEP20('RedBerrySwap Token', 'REDB') {
     /// @notice Creates `_amount` token to `_to`. Must only be called by the owner (MasterChef).
     function mint(address _to, uint256 _amount) public onlyOwner {
         _mint(_to, _amount);
@@ -1211,8 +963,8 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
     // Which is copied and modified from COMPOUND:
     // https://github.com/compound-finance/compound-protocol/blob/master/contracts/Governance/Comp.sol
 
-    // / @notice A record of each accounts delegate
-    mapping(address => address) internal _delegates;
+    /// @notice A record of each accounts delegate
+    mapping (address => address) internal _delegates;
 
     /// @notice A checkpoint for marking number of votes from a given block
     struct Checkpoint {
@@ -1221,50 +973,42 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
     }
 
     /// @notice A record of votes checkpoints for each account, by index
-    mapping(address => mapping(uint32 => Checkpoint)) public checkpoints;
+    mapping (address => mapping (uint32 => Checkpoint)) public checkpoints;
 
     /// @notice The number of checkpoints for each account
-    mapping(address => uint32) public numCheckpoints;
+    mapping (address => uint32) public numCheckpoints;
 
     /// @notice The EIP-712 typehash for the contract's domain
-    bytes32 public constant DOMAIN_TYPEHASH =
-        keccak256(
-            "EIP712Domain(string name,uint256 chainId,address verifyingContract)"
-        );
+    bytes32 public constant DOMAIN_TYPEHASH = keccak256("EIP712Domain(string name,uint256 chainId,address verifyingContract)");
 
     /// @notice The EIP-712 typehash for the delegation struct used by the contract
-    bytes32 public constant DELEGATION_TYPEHASH =
-        keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
+    bytes32 public constant DELEGATION_TYPEHASH = keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
 
     /// @notice A record of states for signing / validating signatures
-    mapping(address => uint256) public nonces;
+    mapping (address => uint) public nonces;
 
-    /// @notice An event thats emitted when an account changes its delegate
-    event DelegateChanged(
-        address indexed delegator,
-        address indexed fromDelegate,
-        address indexed toDelegate
-    );
+      /// @notice An event thats emitted when an account changes its delegate
+    event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate);
 
     /// @notice An event thats emitted when a delegate account's vote balance changes
-    event DelegateVotesChanged(
-        address indexed delegate,
-        uint256 previousBalance,
-        uint256 newBalance
-    );
+    event DelegateVotesChanged(address indexed delegate, uint previousBalance, uint newBalance);
 
     /**
      * @notice Delegate votes from `msg.sender` to `delegatee`
      * @param delegator The address to get delegatee for
      */
-    function delegates(address delegator) external view returns (address) {
+    function delegates(address delegator)
+        external
+        view
+        returns (address)
+    {
         return _delegates[delegator];
     }
 
-    /**
-     * @notice Delegate votes from `msg.sender` to `delegatee`
-     * @param delegatee The address to delegate votes to
-     */
+   /**
+    * @notice Delegate votes from `msg.sender` to `delegatee`
+    * @param delegatee The address to delegate votes to
+    */
     function delegate(address delegatee) external {
         return _delegate(msg.sender, delegatee);
     }
@@ -1280,12 +1024,14 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
      */
     function delegateBySig(
         address delegatee,
-        uint256 nonce,
-        uint256 expiry,
+        uint nonce,
+        uint expiry,
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external {
+    )
+        external
+    {
         bytes32 domainSeparator = keccak256(
             abi.encode(
                 DOMAIN_TYPEHASH,
@@ -1296,26 +1042,26 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
         );
 
         bytes32 structHash = keccak256(
-            abi.encode(DELEGATION_TYPEHASH, delegatee, nonce, expiry)
+            abi.encode(
+                DELEGATION_TYPEHASH,
+                delegatee,
+                nonce,
+                expiry
+            )
         );
 
         bytes32 digest = keccak256(
-            abi.encodePacked("\x19\x01", domainSeparator, structHash)
+            abi.encodePacked(
+                "\x19\x01",
+                domainSeparator,
+                structHash
+            )
         );
 
         address signatory = ecrecover(digest, v, r, s);
-        require(
-            signatory != address(0),
-            "REDB::delegateBySig: invalid signature"
-        );
-        require(
-            nonce == nonces[signatory]++,
-            "REDB::delegateBySig: invalid nonce"
-        );
-        require(
-            block.timestamp <= expiry,
-            "REDB::delegateBySig: signature expired"
-        );
+        require(signatory != address(0), "REDB::delegateBySig: invalid signature");
+        require(nonce == nonces[signatory]++, "REDB::delegateBySig: invalid nonce");
+        require(block.timestamp <= expiry, "REDB::delegateBySig: signature expired");
         return _delegate(signatory, delegatee);
     }
 
@@ -1324,10 +1070,13 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
      * @param account The address to get votes balance
      * @return The number of current votes for `account`
      */
-    function getCurrentVotes(address account) external view returns (uint256) {
+    function getCurrentVotes(address account)
+        external
+        view
+        returns (uint256)
+    {
         uint32 nCheckpoints = numCheckpoints[account];
-        return
-            nCheckpoints > 0 ? checkpoints[account][nCheckpoints - 1].votes : 0;
+        return nCheckpoints > 0 ? checkpoints[account][nCheckpoints - 1].votes : 0;
     }
 
     /**
@@ -1337,15 +1086,12 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
      * @param blockNumber The block number to get the vote balance at
      * @return The number of votes the account had as of the given block
      */
-    function getPriorVotes(address account, uint256 blockNumber)
+    function getPriorVotes(address account, uint blockNumber)
         external
         view
         returns (uint256)
     {
-        require(
-            blockNumber < block.number,
-            "REDB::getPriorVotes: not yet determined"
-        );
+        require(blockNumber < block.number, "REDB::getPriorVotes: not yet determined");
 
         uint32 nCheckpoints = numCheckpoints[account];
         if (nCheckpoints == 0) {
@@ -1378,7 +1124,9 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
         return checkpoints[account][lower].votes;
     }
 
-    function _delegate(address delegator, address delegatee) internal {
+    function _delegate(address delegator, address delegatee)
+        internal
+    {
         address currentDelegate = _delegates[delegator];
         uint256 delegatorBalance = balanceOf(delegator); // balance of underlying REDBs (not scaled);
         _delegates[delegator] = delegatee;
@@ -1388,18 +1136,12 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
         _moveDelegates(currentDelegate, delegatee, delegatorBalance);
     }
 
-    function _moveDelegates(
-        address srcRep,
-        address dstRep,
-        uint256 amount
-    ) internal {
+    function _moveDelegates(address srcRep, address dstRep, uint256 amount) internal {
         if (srcRep != dstRep && amount > 0) {
             if (srcRep != address(0)) {
                 // decrease old representative
                 uint32 srcRepNum = numCheckpoints[srcRep];
-                uint256 srcRepOld = srcRepNum > 0
-                    ? checkpoints[srcRep][srcRepNum - 1].votes
-                    : 0;
+                uint256 srcRepOld = srcRepNum > 0 ? checkpoints[srcRep][srcRepNum - 1].votes : 0;
                 uint256 srcRepNew = srcRepOld - amount;
                 _writeCheckpoint(srcRep, srcRepNum, srcRepOld, srcRepNew);
             }
@@ -1407,9 +1149,7 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
             if (dstRep != address(0)) {
                 // increase new representative
                 uint32 dstRepNum = numCheckpoints[dstRep];
-                uint256 dstRepOld = dstRepNum > 0
-                    ? checkpoints[dstRep][dstRepNum - 1].votes
-                    : 0;
+                uint256 dstRepOld = dstRepNum > 0 ? checkpoints[dstRep][dstRepNum - 1].votes : 0;
                 uint256 dstRepNew = dstRepOld + amount;
                 _writeCheckpoint(dstRep, dstRepNum, dstRepOld, dstRepNew);
             }
@@ -1421,58 +1161,43 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
         uint32 nCheckpoints,
         uint256 oldVotes,
         uint256 newVotes
-    ) internal {
-        uint32 blockNumber = safe32(
-            block.number,
-            "REDB::_writeCheckpoint: block number exceeds 32 bits"
-        );
+    )
+        internal
+    {
+        uint32 blockNumber = safe32(block.number, "REDB::_writeCheckpoint: block number exceeds 32 bits");
 
-        if (
-            nCheckpoints > 0 &&
-            checkpoints[delegatee][nCheckpoints - 1].fromBlock == blockNumber
-        ) {
+        if (nCheckpoints > 0 && checkpoints[delegatee][nCheckpoints - 1].fromBlock == blockNumber) {
             checkpoints[delegatee][nCheckpoints - 1].votes = newVotes;
         } else {
-            checkpoints[delegatee][nCheckpoints] = Checkpoint(
-                blockNumber,
-                newVotes
-            );
+            checkpoints[delegatee][nCheckpoints] = Checkpoint(blockNumber, newVotes);
             numCheckpoints[delegatee] = nCheckpoints + 1;
         }
 
         emit DelegateVotesChanged(delegatee, oldVotes, newVotes);
     }
 
-    function safe32(uint256 n, string memory errorMessage)
-        internal
-        pure
-        returns (uint32)
-    {
+    function safe32(uint n, string memory errorMessage) internal pure returns (uint32) {
         require(n < 2**32, errorMessage);
         return uint32(n);
     }
 
-    function getChainId() internal view returns (uint256) {
+    function getChainId() internal view returns (uint) {
         uint256 chainId;
-        assembly {
-            chainId := chainid()
-        }
+        assembly { chainId := chainid() }
         return chainId;
     }
 }
-// File: contracts\MasterChef.sol
 
-pragma solidity 0.8.6;
-
+// import "@nomiclabs/buidler/console.sol";
 interface IMigratorChef {
-    // Perform LP token migration from legacy PancakeSwap to CakeSwap.
+    // Perform LP token migration from legacy RedBerrySwap to RedbSwap.
     // Take the current LP token address and return the new LP token address.
     // Migrator should have full access to the caller's LP token.
     // Return the new LP token address.
     //
-    // XXX Migrator must have allowance access to PancakeSwap LP tokens.
-    // CakeSwap must mint EXACTLY the same amount of CakeSwap LP tokens or
-    // else something bad will happen. Traditional PancakeSwap does not
+    // XXX Migrator must have allowance access to RedBerrySwap LP tokens.
+    // RedbSwap must mint EXACTLY the same amount of RedbSwap LP tokens or
+    // else something bad will happen. Traditional RedBerrySwap does not
     // do that so be careful!
     function migrate(IBEP20 token) external returns (IBEP20);
 }
@@ -1490,9 +1215,8 @@ contract MasterChef is Ownable {
 
     // Info of each user.
     struct UserInfo {
-        uint256 amount; // How many LP tokens the user has provided.
+        uint256 amount;     // How many LP tokens the user has provided.
         uint256 rewardDebt; // Reward debt. See explanation below.
-        uint256 depositeTime;
         //
         // We do some fancy math here. Basically, any point in time, the amount of REDBs
         // entitled to a user but is pending to be distributed is:
@@ -1508,81 +1232,61 @@ contract MasterChef is Ownable {
 
     // Info of each pool.
     struct PoolInfo {
-        IBEP20 lpToken; // Address of LP token contract.
-        uint256 allocPoint; // How many allocation points assigned to this pool. REDBs to distribute per block.
-        uint256 lastRewardBlock; // Last block number that REDBs distribution occurs.
+        IBEP20 lpToken;           // Address of LP token contract.
+        uint256 allocPoint;       // How many allocation points assigned to this pool. REDBs to distribute per block.
+        uint256 lastRewardBlock;  // Last block number that REDBs distribution occurs.
         uint256 accRedBerryPerShare; // Accumulated REDBs per share, times 1e12. See below.
-        uint16 depositFeeBP; // Deposit fee in basis points
     }
 
-    // The RedBerry TOKEN!
-    RedBerryToken public RedBerry;
+    // The REDB TOKEN!
+    RedBerryToken public redb;
     // Dev address.
     address public devaddr;
     // REDB tokens created per block.
-    uint256 public redBerryPerBlock;
-    // Bonus muliplier for early redBerry makers.
+    uint256 public redbPerBlock;
+    // Bonus muliplier for early redb makers.
     uint256 public BONUS_MULTIPLIER = 1;
-    // Deposit Fee address
-    address public feeAddress;
     // The migrator contract. It has a lot of power. Can only be set through governance (owner).
     IMigratorChef public migrator;
 
     // Info of each pool.
     PoolInfo[] public poolInfo;
     // Info of each user that stakes LP tokens.
-    mapping(uint256 => mapping(address => UserInfo)) public userInfo;
-    // Total allocation points. Must be the sum of all allocation points in all pools.
+    mapping (uint256 => mapping (address => UserInfo)) public userInfo;
+    // Total allocation poitns. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint = 0;
     // The block number when REDB mining starts.
     uint256 public startBlock;
-    // stop time between deosite and widrow depault 8 Days
-    uint256 public HarvestLockup = 691200;
-
-    // Referral commission rate in basis points.
-    uint16 public referralCommissionRateForAll = 100;
-    uint16 public referralCommissionRateForNew = 200;
-    uint256 public timeForSetNewCommissionRate = 0;
-    // Max referral commission rate: 10%.
-    // uint16 public constant MAXIMUM_REFERRAL_COMMISSION_RATE = 1000;
-
- 
-    mapping(address => uint256) public userReferalAmount;
-
-    IRedBerryReferral public redBerryReferral;
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
-    event EmergencyWithdraw(
-        address indexed user,
-        uint256 indexed pid,
-        uint256 amount
-    );
+    event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
 
     constructor(
-        RedBerryToken _redBerry,
+        RedBerryToken _redb,
         address _devaddr,
-        address _feeAddress,
-        uint256 _redBerryPerBlock,
-        uint256 _startBlock,
-        uint16 _depositFeeBP
-    ) {
-        RedBerry = _redBerry;
+        uint256 _redbPerBlock,
+        uint256 _startBlock
+    )  {
+        redb = _redb;
         devaddr = _devaddr;
-        feeAddress = _feeAddress;
-        redBerryPerBlock = _redBerryPerBlock;
+        redbPerBlock = _redbPerBlock;
         startBlock = _startBlock;
 
-        poolInfo.push(
-            PoolInfo({
-                lpToken: _redBerry,
-                allocPoint: 1000,
-                lastRewardBlock: _startBlock,
-                accRedBerryPerShare: 0,
-                depositFeeBP: _depositFeeBP
-            })
-        );
+        // staking pool
+        poolInfo.push(PoolInfo({
+            lpToken: _redb,
+            allocPoint: 1000,
+            lastRewardBlock: startBlock,
+            accRedBerryPerShare: 0
+        }));
+
         totalAllocPoint = 1000;
+
+    }
+
+    function updateMultiplier(uint256 multiplierNumber) public onlyOwner {
+        BONUS_MULTIPLIER = multiplierNumber;
     }
 
     function poolLength() external view returns (uint256) {
@@ -1591,55 +1295,29 @@ contract MasterChef is Ownable {
 
     // Add a new lp to the pool. Can only be called by the owner.
     // XXX DO NOT add the same LP token more than once. Rewards will be messed up if you do.
-    function add(
-        uint256 _allocPoint,
-        IBEP20 _lpToken,
-        uint16 _depositFeeBP,
-        bool _withUpdate
-    ) public onlyOwner {
-        require(
-            _depositFeeBP <= 10000,
-            "add: invalid deposit fee basis points"
-        );
+    function add(uint256 _allocPoint, IBEP20 _lpToken, bool _withUpdate) public onlyOwner {
         if (_withUpdate) {
             massUpdatePools();
         }
-        uint256 lastRewardBlock = block.number > startBlock
-            ? block.number
-            : startBlock;
+        uint256 lastRewardBlock = block.number > startBlock ? block.number : startBlock;
         totalAllocPoint = totalAllocPoint.add(_allocPoint);
-        poolInfo.push(
-            PoolInfo({
-                lpToken: _lpToken,
-                allocPoint: _allocPoint,
-                lastRewardBlock: lastRewardBlock,
-                accRedBerryPerShare: 0,
-                depositFeeBP: _depositFeeBP
-            })
-        );
+        poolInfo.push(PoolInfo({
+            lpToken: _lpToken,
+            allocPoint: _allocPoint,
+            lastRewardBlock: lastRewardBlock,
+            accRedBerryPerShare: 0
+        }));
         updateStakingPool();
     }
 
-    // Update the given pool's REDB allocation point and deposit fee. Can only be called by the owner.
-    function set(
-        uint256 _pid,
-        uint256 _allocPoint,
-        uint16 _depositFeeBP,
-        bool _withUpdate
-    ) public onlyOwner {
-        require(
-            _depositFeeBP <= 10000,
-            "set: invalid deposit fee basis points"
-        );
+    // Update the given pool's REDB allocation point. Can only be called by the owner.
+    function set(uint256 _pid, uint256 _allocPoint, bool _withUpdate) public onlyOwner {
         if (_withUpdate) {
             massUpdatePools();
         }
-        totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(
-            _allocPoint
-        );
+        totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(_allocPoint);
         uint256 prevAllocPoint = poolInfo[_pid].allocPoint;
         poolInfo[_pid].allocPoint = _allocPoint;
-        poolInfo[_pid].depositFeeBP = _depositFeeBP;
         if (prevAllocPoint != _allocPoint) {
             updateStakingPool();
         }
@@ -1653,9 +1331,7 @@ contract MasterChef is Ownable {
         }
         if (points != 0) {
             points = points.div(3);
-            totalAllocPoint = totalAllocPoint.sub(poolInfo[0].allocPoint).add(
-                points
-            );
+            totalAllocPoint = totalAllocPoint.sub(poolInfo[0].allocPoint).add(points);
             poolInfo[0].allocPoint = points;
         }
     }
@@ -1678,43 +1354,22 @@ contract MasterChef is Ownable {
     }
 
     // Return reward multiplier over the given _from to _to block.
-    function getMultiplier(uint256 _from, uint256 _to)
-        public
-        view
-        returns (uint256)
-    {
+    function getMultiplier(uint256 _from, uint256 _to) public view returns (uint256) {
         return _to.sub(_from).mul(BONUS_MULTIPLIER);
     }
 
-    function updateMultiplier(uint256 multiplierNumber) public onlyOwner {
-        BONUS_MULTIPLIER = multiplierNumber;
-    }
-
-    // View function to see pending redBerrys on frontend.
-    function pendingRedBerry(uint256 _pid, address _user)
-        external
-        view
-        returns (uint256)
-    {
+    // View function to see pending REDBs on frontend.
+    function pendingRedBerry(uint256 _pid, address _user) external view returns (uint256) {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accRedBerryPerShare = pool.accRedBerryPerShare;
         uint256 lpSupply = pool.lpToken.balanceOf(address(this));
         if (block.number > pool.lastRewardBlock && lpSupply != 0) {
-            uint256 multiplier = getMultiplier(
-                pool.lastRewardBlock,
-                block.number
-            );
-            uint256 redBerryReward = multiplier
-            .mul(redBerryPerBlock)
-            .mul(pool.allocPoint)
-            .div(totalAllocPoint);
-            accRedBerryPerShare = accRedBerryPerShare.add(
-                redBerryReward.mul(1e12).div(lpSupply)
-            );
+            uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
+            uint256 redbReward = multiplier.mul(redbPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+            accRedBerryPerShare = accRedBerryPerShare.add(redbReward.mul(1e12).div(lpSupply));
         }
-        return
-            user.amount.mul(accRedBerryPerShare).div(1e12).sub(user.rewardDebt);
+        return user.amount.mul(accRedBerryPerShare).div(1e12).sub(user.rewardDebt);
     }
 
     // Update reward variables for all pools. Be careful of gas spending!
@@ -1725,6 +1380,7 @@ contract MasterChef is Ownable {
         }
     }
 
+
     // Update reward variables of the given pool to be up-to-date.
     function updatePool(uint256 _pid) public {
         PoolInfo storage pool = poolInfo[_pid];
@@ -1732,68 +1388,35 @@ contract MasterChef is Ownable {
             return;
         }
         uint256 lpSupply = pool.lpToken.balanceOf(address(this));
-        if (lpSupply == 0 || pool.allocPoint == 0) {
+        if (lpSupply == 0) {
             pool.lastRewardBlock = block.number;
             return;
         }
         uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-        uint256 redBerryReward = multiplier
-        .mul(redBerryPerBlock)
-        .mul(pool.allocPoint)
-        .div(totalAllocPoint);
-        RedBerry.mint(devaddr, redBerryReward.div(10));
-        RedBerry.mint(address(this), redBerryReward);
-        pool.accRedBerryPerShare = pool.accRedBerryPerShare.add(
-            redBerryReward.mul(1e12).div(lpSupply)
-        );
+        uint256 redbReward = multiplier.mul(redbPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+        redb.mint(devaddr, redbReward.div(10));
+        redb.mint(address(this), redbReward);
+        pool.accRedBerryPerShare = pool.accRedBerryPerShare.add(redbReward.mul(1e12).div(lpSupply));
         pool.lastRewardBlock = block.number;
     }
 
     // Deposit LP tokens to MasterChef for REDB allocation.
-    function deposit(
-        uint256 _pid,
-        uint256 _amount,
-        address _referrer
-    ) public {
+    function deposit(uint256 _pid, uint256 _amount) public {
+
+        require (_pid != 0, 'deposit REDB by staking');
+
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
-
-        if (
-            _amount > 0 &&
-            address(redBerryReferral) != address(0) &&
-            _referrer != address(0) &&
-            _referrer != msg.sender &&
-            user.amount == 0
-        ) {
-            redBerryReferral.recordReferral(msg.sender, _referrer);
-        }
-        payOrLockupPendingredb(_pid);
         if (user.amount > 0) {
-            uint256 pending = user
-            .amount
-            .mul(pool.accRedBerryPerShare)
-            .div(1e12)
-            .sub(user.rewardDebt);
-            if (pending > 0) {
+            uint256 pending = user.amount.mul(pool.accRedBerryPerShare).div(1e12).sub(user.rewardDebt);
+            if(pending > 0) {
                 safeRedBerryTransfer(msg.sender, pending);
             }
-        } else {
-            user.depositeTime = block.timestamp;
         }
         if (_amount > 0) {
-            pool.lpToken.safeTransferFrom(
-                address(msg.sender),
-                address(this),
-                _amount
-            );
-            if (pool.depositFeeBP > 0) {
-                uint256 depositFee = _amount.mul(pool.depositFeeBP).div(10000);
-                pool.lpToken.safeTransfer(feeAddress, depositFee);
-                user.amount = user.amount.add(_amount).sub(depositFee);
-            } else {
-                user.amount = user.amount.add(_amount);
-            }
+            pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
+            user.amount = user.amount.add(_amount);
         }
         user.rewardDebt = user.amount.mul(pool.accRedBerryPerShare).div(1e12);
         emit Deposit(msg.sender, _pid, _amount);
@@ -1801,24 +1424,18 @@ contract MasterChef is Ownable {
 
     // Withdraw LP tokens from MasterChef.
     function withdraw(uint256 _pid, uint256 _amount) public {
+
+        require (_pid != 0, 'withdraw REDB by unstaking');
+
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
-        require(
-            block.timestamp > user.depositeTime.add(HarvestLockup),
-            "deposite time is lase then required"
-        );
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(_pid);
-        payOrLockupPendingredb(_pid);
-        uint256 pending = user
-        .amount
-        .mul(pool.accRedBerryPerShare)
-        .div(1e12)
-        .sub(user.rewardDebt);
-        if (pending > 0) {
+        uint256 pending = user.amount.mul(pool.accRedBerryPerShare).div(1e12).sub(user.rewardDebt);
+        if(pending > 0) {
             safeRedBerryTransfer(msg.sender, pending);
         }
-        if (_amount > 0) {
+        if(_amount > 0) {
             user.amount = user.amount.sub(_amount);
             pool.lpToken.safeTransfer(address(msg.sender), _amount);
         }
@@ -1832,21 +1449,13 @@ contract MasterChef is Ownable {
         UserInfo storage user = userInfo[0][msg.sender];
         updatePool(0);
         if (user.amount > 0) {
-            uint256 pending = user
-            .amount
-            .mul(pool.accRedBerryPerShare)
-            .div(1e12)
-            .sub(user.rewardDebt);
-            if (pending > 0) {
+            uint256 pending = user.amount.mul(pool.accRedBerryPerShare).div(1e12).sub(user.rewardDebt);
+            if(pending > 0) {
                 safeRedBerryTransfer(msg.sender, pending);
             }
         }
-        if (_amount > 0) {
-            pool.lpToken.safeTransferFrom(
-                address(msg.sender),
-                address(this),
-                _amount
-            );
+        if(_amount > 0) {
+            pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
             user.amount = user.amount.add(_amount);
         }
         user.rewardDebt = user.amount.mul(pool.accRedBerryPerShare).div(1e12);
@@ -1861,15 +1470,11 @@ contract MasterChef is Ownable {
         UserInfo storage user = userInfo[0][msg.sender];
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(0);
-        uint256 pending = user
-        .amount
-        .mul(pool.accRedBerryPerShare)
-        .div(1e12)
-        .sub(user.rewardDebt);
-        if (pending > 0) {
+        uint256 pending = user.amount.mul(pool.accRedBerryPerShare).div(1e12).sub(user.rewardDebt);
+        if(pending > 0) {
             safeRedBerryTransfer(msg.sender, pending);
         }
-        if (_amount > 0) {
+        if(_amount > 0) {
             user.amount = user.amount.sub(_amount);
             pool.lpToken.safeTransfer(address(msg.sender), _amount);
         }
@@ -1883,20 +1488,19 @@ contract MasterChef is Ownable {
     function emergencyWithdraw(uint256 _pid) public {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
-        uint256 amount = user.amount;
+        pool.lpToken.safeTransfer(address(msg.sender), user.amount);
+        emit EmergencyWithdraw(msg.sender, _pid, user.amount);
         user.amount = 0;
         user.rewardDebt = 0;
-        pool.lpToken.safeTransfer(address(msg.sender), amount);
-        emit EmergencyWithdraw(msg.sender, _pid, amount);
     }
 
-    // Safe redBerry transfer function, just in case if rounding error causes pool to not have enough REDBs.
+    // Safe redb transfer function, just in case if rounding error causes pool to not have enough REDBs.
     function safeRedBerryTransfer(address _to, uint256 _amount) internal {
-        uint256 RedBerryBal = RedBerry.balanceOf(address(this));
+        uint256 RedBerryBal = redb.balanceOf(address(this));
         if (_amount > RedBerryBal) {
-            RedBerry.transfer(_to, RedBerryBal);
+            redb.transfer(_to, RedBerryBal);
         } else {
-            RedBerry.transfer(_to, RedBerryBal);
+            redb.transfer(_to, RedBerryBal);
         }
     }
 
@@ -1904,107 +1508,5 @@ contract MasterChef is Ownable {
     function dev(address _devaddr) public {
         require(msg.sender == devaddr, "dev: wut?");
         devaddr = _devaddr;
-    }
-
-    function setFeeAddress(address _feeAddress) public {
-        require(msg.sender == feeAddress, "setFeeAddress: FORBIDDEN");
-        feeAddress = _feeAddress;
-    }
-
-    //Pancake has to add hidden dummy pools inorder to alter the emission, here we make it simple and transparent to all.
-    function updateEmissionRate(uint256 _redBerryPerBlock) public onlyOwner {
-        massUpdatePools();
-        redBerryPerBlock = _redBerryPerBlock;
-    }
-
-    function updateHarvestLookupTime(uint256 _time) public onlyOwner {
-        HarvestLockup = _time;
-    }
-
-    // Update the redBerry referral contract address by the owner
-    function setRedBerryReferral(IRedBerryReferral _redBerryReferral)
-        public
-        onlyOwner
-    {
-        redBerryReferral = _redBerryReferral;
-    }
-
-    function payOrLockupPendingredb(uint256 _pid) internal {
-        PoolInfo storage pool = poolInfo[_pid];
-        UserInfo storage user = userInfo[_pid][msg.sender];
-
-        uint256 pending = user
-        .amount
-        .mul(pool.accRedBerryPerShare)
-        .div(1e12)
-        .sub(user.rewardDebt);
-        if (pending > 0) {
-            payReferralCommission(msg.sender, pending, user.depositeTime);
-        }
-    }
-
-    function setNewReferralCommissionRate(uint16 _commitionRate)
-        public
-        onlyOwner
-    {
-        referralCommissionRateForNew = _commitionRate;
-        timeForSetNewCommissionRate = block.timestamp;
-    }
-
-    function setTimeForNewReferralCommissionRate(uint256 _time)
-        public
-        onlyOwner
-    {
-        timeForSetNewCommissionRate = _time;
-    }
-
-    function setAllReferralCommissionRate(uint16 _commitionRate)
-        public
-        onlyOwner
-    {
-        referralCommissionRateForAll = _commitionRate;
-    }
-
-    function payReferralCommission(
-        address _user,
-        uint256 _pending,
-        uint256 _depositeTime
-    ) internal {
-        uint256 referralCommissionRate;
-        if (
-            timeForSetNewCommissionRate > 0 &&
-            _depositeTime > timeForSetNewCommissionRate
-        ) {
-            referralCommissionRate = referralCommissionRateForNew;
-        } else {
-            referralCommissionRate = referralCommissionRateForAll;
-        }
-        if (
-            address(redBerryReferral) != address(0) &&
-            referralCommissionRate > 0
-        ) {
-            address referrer = redBerryReferral.getReferrer(_user);
-            uint256 commissionAmount = _pending.mul(referralCommissionRate).div(
-                10000
-            );
-
-            if (referrer != address(0) && commissionAmount > 0) {
-                userReferalAmount[referrer] = userReferalAmount[referrer] + commissionAmount;
-                RedBerry.mint(referrer, commissionAmount);
-                redBerryReferral.recordReferralCommission(
-                    referrer,
-                    commissionAmount
-                );
-            }
-        }
-    }
-    
-    function getUserReferrerBalance(address _address) public view returns(uint256) {
-        return userReferalAmount[_address];
-    }
-    
-    function widrowReferrerBalance() public  {
-        uint256 referarBalance = userReferalAmount[msg.sender];
-        RedBerry.mint(msg.sender, referarBalance);
     }
 }

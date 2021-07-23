@@ -15,3 +15,7 @@ Steps To deploy :
 -   deploy weth or using existing weth of any testnet
 -   deploy router contract
 -   call addLiquidity function where you need to pass token adderess(you can use existing erc20 tokens need to approve router contract)
+
+factory contract : 0x4f7eaF42277DacE388618679fC57EdfCF402cd25
+smartcheaf : 0x57AF1203FCd93bBC443436F573a614f8BCab1372
+deposite tx : https://rinkeby.etherscan.io/tx/0xb627fbf5f548362975cf07d3c3bb93bb671a884547384142814c1708e8c08838

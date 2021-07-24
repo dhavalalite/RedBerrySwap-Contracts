@@ -6,7 +6,7 @@
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity 0.8.4;
 
 /*
  * @dev Provides information about the current execution context, including the
@@ -20,7 +20,7 @@ pragma solidity >=0.6.0 <0.8.0;
  */
 abstract contract Context {
     function _msgSender() internal view virtual returns (address payable) {
-        return msg.sender;
+        return payable(msg.sender);
     }
 
     function _msgData() internal view virtual returns (bytes memory) {
@@ -31,7 +31,7 @@ abstract contract Context {
 
 // File: @openzeppelin/contracts/access/Ownable.sol
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity 0.8.4;
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -56,7 +56,7 @@ abstract contract Ownable is Context {
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
-    constructor() internal {
+    constructor()  {
         address msgSender = _msgSender();
         _owner = msgSender;
         emit OwnershipTransferred(address(0), msgSender);
@@ -213,7 +213,7 @@ interface IBEP20 {
 
 // File: @openzeppelin/contracts/math/SafeMath.sol
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity 0.8.4;
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
@@ -460,7 +460,7 @@ library SafeMath {
 
 // File: @openzeppelin/contracts/utils/ReentrancyGuard.sol
 
-pragma solidity >=0.6.0 <0.8.0;
+pragma solidity 0.8.4;
 
 /**
  * @dev Contract module that helps prevent reentrant calls to a function.
@@ -495,7 +495,7 @@ abstract contract ReentrancyGuard {
 
     uint256 private _status;
 
-    constructor() internal {
+    constructor() {
         _status = _NOT_ENTERED;
     }
 
@@ -523,7 +523,7 @@ abstract contract ReentrancyGuard {
 
 // File: @openzeppelin/contracts/utils/Address.sol
 
-pragma solidity >=0.6.2 <0.8.0;
+pragma solidity 0.8.4;
 
 /**
  * @dev Collection of functions related to the address type
@@ -777,7 +777,7 @@ library Address {
 
 // File: bsc-library/contracts/SafeBEP20.sol
 
-pragma solidity >=0.6.2 <0.8.0;
+pragma solidity 0.8.4;
 
 /**
  * @title SafeBEP20
@@ -906,7 +906,7 @@ library SafeBEP20 {
 
 // File: contracts/SmartChefInitializable.sol
 
-pragma solidity >=0.6.2 <0.8.0;
+pragma solidity 0.8.4;
 
 contract SmartChefInitializable is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
@@ -965,7 +965,7 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
     event RewardsStop(uint256 blockNumber);
     event Withdraw(address indexed user, uint256 amount);
 
-    constructor() public {
+    constructor() {
         SMART_CHEF_FACTORY = msg.sender;
     }
 
@@ -1286,12 +1286,12 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
 
 // File: contracts/SmartChefFactory.sol
 
-pragma solidity >=0.6.2 <0.8.0;
+pragma solidity 0.8.4;
 
 contract SmartChefFactory is Ownable {
     event NewSmartChefContract(address indexed smartChef);
 
-    constructor() public {
+    constructor()  {
         //
     }
 

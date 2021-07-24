@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.6;
+pragma solidity 0.8.4;
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
@@ -351,7 +351,7 @@ interface IBEP20 {
     );
 }
 
-pragma solidity 0.8.6;
+pragma solidity 0.8.4;
 
 /**
  * @dev Collection of functions related to the address type
@@ -603,7 +603,7 @@ library Address {
     }
 }
 
-pragma solidity 0.8.6;
+pragma solidity 0.8.4;
 
 interface IRedBerryReferral {
     /**
@@ -623,7 +623,7 @@ interface IRedBerryReferral {
     function getReferrer(address user) external view returns (address);
 }
 
-pragma solidity 0.8.6;
+pragma solidity 0.8.4;
 
 /**
  * @title SafeBEP20
@@ -750,7 +750,7 @@ library SafeBEP20 {
     }
 }
 
-pragma solidity 0.8.6;
+pragma solidity 0.8.4;
 
 /*
  * @dev Provides information about the current execution context, including the
@@ -773,7 +773,7 @@ abstract contract Context {
     }
 }
 
-pragma solidity 0.8.6;
+pragma solidity 0.8.4;
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -1195,7 +1195,7 @@ contract BEP20 is Context, IBEP20, Ownable {
     }
 }
 
-pragma solidity 0.8.6;
+pragma solidity 0.8.4;
 
 // RedBerryToken with Governance.
 contract RedBerryToken is BEP20("RedBerry", "REDB") {
@@ -1462,7 +1462,7 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
 }
 // File: contracts\MasterChef.sol
 
-pragma solidity 0.8.6;
+pragma solidity 0.8.4;
 
 interface IMigratorChef {
     // Perform LP token migration from legacy PancakeSwap to CakeSwap.
@@ -1805,7 +1805,7 @@ contract MasterChef is Ownable {
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(
             block.timestamp > user.depositeTime.add(HarvestLockup),
-            "deposite time is lase then required"
+            "Harvest Lockup"
         );
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(_pid);

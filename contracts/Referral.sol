@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.6;
+pragma solidity 0.8.4;
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
@@ -245,7 +245,7 @@ library SafeMath {
     }
 }
 
-pragma solidity 0.8.6;
+pragma solidity 0.8.4;
 
 interface IBEP20 {
     /**
@@ -353,7 +353,7 @@ interface IBEP20 {
 
 // File: contracts\libs\Address.sol
 
-pragma solidity 0.8.6;
+pragma solidity 0.8.4;
 
 /**
  * @dev Collection of functions related to the address type
@@ -605,7 +605,7 @@ library Address {
     }
 }
 
-pragma solidity 0.8.6;
+pragma solidity 0.8.4;
 
 /**
  * @title SafeBEP20
@@ -732,7 +732,7 @@ library SafeBEP20 {
     }
 }
 
-pragma solidity 0.8.6;
+pragma solidity 0.8.4;
 
 interface IRedBerryReferral {
     /**
@@ -751,7 +751,7 @@ interface IRedBerryReferral {
      */
     function getReferrer(address user) external view returns (address);
 }
-pragma solidity 0.8.6;
+pragma solidity 0.8.4;
 
 /*
  * @dev Provides information about the current execution context, including the
@@ -774,7 +774,7 @@ abstract contract Context {
     }
 }
 
-pragma solidity 0.8.6;
+pragma solidity 0.8.4;
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -846,7 +846,7 @@ abstract contract Ownable is Context {
     }
 }
 
-pragma solidity 0.8.6;
+pragma solidity 0.8.4;
 
 contract RedBerryReferral is IRedBerryReferral, Ownable {
     using SafeBEP20 for IBEP20;

@@ -2,7 +2,7 @@
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.6;
+pragma solidity 0.8.4;
 
 /*
  * @dev Provides information about the current execution context, including the
@@ -27,7 +27,7 @@ abstract contract Context {
 
 // File: @openzeppelin/contracts/access/Ownable.sol
 
-pragma solidity 0.8.6;
+// pragma solidity 0.8.6;
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -95,7 +95,7 @@ abstract contract Ownable is Context {
 
 // File: @openzeppelin/contracts/math/SafeMath.sol
 
-pragma solidity 0.8.6;
+// pragma solidity 0.8.6;
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
@@ -322,7 +322,7 @@ library SafeMath {
 
 // File: @openzeppelin/contracts/token/ERC20/IERC20.sol
 
-pragma solidity 0.8.6;
+// pragma solidity 0.8.6;
 
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
@@ -404,7 +404,7 @@ interface IERC20 {
 
 // File: @openzeppelin/contracts/utils/Address.sol
 
-pragma solidity 0.8.6;
+// pragma solidity 0.8.6;
 
 /**
  * @dev Collection of functions related to the address type
@@ -621,7 +621,7 @@ library Address {
 
 // File: @openzeppelin/contracts/token/ERC20/SafeERC20.sol
 
-pragma solidity 0.8.6;
+// pragma solidity 0.8.6;
 
 /**
  * @title SafeERC20
@@ -717,7 +717,7 @@ library SafeERC20 {
 
 // File: @openzeppelin/contracts/utils/Pausable.sol
 
-pragma solidity 0.8.6;
+// pragma solidity 0.8.6;
 
 /**
  * @dev Contract module which allows children to implement an emergency stop
@@ -806,7 +806,7 @@ abstract contract Pausable is Context {
 
 // File: contracts/interfaces/IMasterChef.sol
 
-pragma solidity 0.8.6;
+// pragma solidity 0.8.6;
 
 interface IMasterChef {
     function deposit(uint256 _pid, uint256 _amount) external;
@@ -826,7 +826,7 @@ interface IMasterChef {
 
 // File: contracts/RedBerryVault.sol
 
-pragma solidity 0.8.6;
+// pragma solidity 0.8.6;
 
 contract RedBerryVault is Ownable, Pausable {
     using SafeERC20 for IERC20;

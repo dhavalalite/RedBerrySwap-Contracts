@@ -1990,7 +1990,6 @@ contract MasterChef is Ownable {
 
             if (referrer != address(0) && commissionAmount > 0) {
                 userReferalAmount[referrer] = userReferalAmount[referrer] + commissionAmount;
-                RedBerry.mint(referrer, commissionAmount);
                 redBerryReferral.recordReferralCommission(
                     referrer,
                     commissionAmount

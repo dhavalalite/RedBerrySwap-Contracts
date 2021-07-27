@@ -2004,6 +2004,7 @@ contract MasterChef is Ownable {
     
     function widrowReferrerBalance() public  {
         uint256 referarBalance = userReferalAmount[msg.sender];
+        userReferalAmount[msg.sender] = 0;
         RedBerry.mint(msg.sender, referarBalance);
     }
 }

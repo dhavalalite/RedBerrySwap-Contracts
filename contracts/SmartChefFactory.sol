@@ -1047,7 +1047,7 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
             _referrer != msg.sender &&
             user.amount == 0
         ) {
-            referrers[msg.sender] =  _referrer;
+            referrers[msg.sender] = _referrer;
         }
         _updatePool();
         payOrLockupPendingReward();
@@ -1333,14 +1333,14 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
         referralCommissionRateForAll = _commitionRate;
     }
 
-     function payOrLockupPendingReward() internal {
+    function payOrLockupPendingReward() internal {
         UserInfo storage user = userInfo[msg.sender];
 
         uint256 pending = user
-                .amount
-                .mul(accTokenPerShare)
-                .div(PRECISION_FACTOR)
-                .sub(user.rewardDebt);
+            .amount
+            .mul(accTokenPerShare)
+            .div(PRECISION_FACTOR)
+            .sub(user.rewardDebt);
         if (pending > 0) {
             payReferralCommission(msg.sender, pending, user.depositeTime);
         }
@@ -1360,14 +1360,12 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
         } else {
             referralCommissionRate = referralCommissionRateForAll;
         }
-        if (
-            referralCommissionRate > 0
-        ) {
+        if (referralCommissionRate > 0) {
             address referrer = referrers[_user];
             uint256 commissionAmount = _pending.mul(referralCommissionRate).div(
                 10000
             );
-            
+
             UserInfo storage user = userInfo[referrer];
 
             if (
@@ -1380,6 +1378,14 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
                     commissionAmount;
             }
         }
+    }
+    
+     function getUserReferrerBalance(address _address)
+        public
+        view
+        returns (uint256)
+    {
+        return userReferalAmount[_address];
     }
 }
 
@@ -1445,4 +1451,6 @@ contract SmartChefFactory is Ownable {
 
         emit NewSmartChefContract(smartChefAddress);
     }
+
+   
 }

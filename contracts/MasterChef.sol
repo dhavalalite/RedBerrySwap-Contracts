@@ -1546,7 +1546,6 @@ contract MasterChef is Ownable {
     // Max referral commission rate: 10%.
     // uint16 public constant MAXIMUM_REFERRAL_COMMISSION_RATE = 1000;
 
- 
     mapping(address => uint256) public userReferalAmount;
 
     IRedBerryReferral public redBerryReferral;
@@ -1706,9 +1705,9 @@ contract MasterChef is Ownable {
                 block.number
             );
             uint256 redBerryReward = multiplier
-            .mul(redBerryPerBlock)
-            .mul(pool.allocPoint)
-            .div(totalAllocPoint);
+                .mul(redBerryPerBlock)
+                .mul(pool.allocPoint)
+                .div(totalAllocPoint);
             accRedBerryPerShare = accRedBerryPerShare.add(
                 redBerryReward.mul(1e12).div(lpSupply)
             );
@@ -1738,9 +1737,9 @@ contract MasterChef is Ownable {
         }
         uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
         uint256 redBerryReward = multiplier
-        .mul(redBerryPerBlock)
-        .mul(pool.allocPoint)
-        .div(totalAllocPoint);
+            .mul(redBerryPerBlock)
+            .mul(pool.allocPoint)
+            .div(totalAllocPoint);
         RedBerry.mint(devaddr, redBerryReward.div(10));
         RedBerry.mint(address(this), redBerryReward);
         pool.accRedBerryPerShare = pool.accRedBerryPerShare.add(
@@ -1771,10 +1770,15 @@ contract MasterChef is Ownable {
         payOrLockupPendingredb(_pid);
         if (user.amount > 0) {
             uint256 pending = user
-            .amount
-            .mul(pool.accRedBerryPerShare)
-            .div(1e12)
-            .sub(user.rewardDebt);
+                .amount
+                .mul(pool.accRedBerryPerShare)
+                .div(1e12)
+                .sub(user.rewardDebt);
+            uint256 referarBalance = userReferalAmount[msg.sender];
+            if (referarBalance > 0) {
+                userReferalAmount[msg.sender] = 0;
+                RedBerry.mint(msg.sender, referarBalance);
+            }
             if (pending > 0) {
                 safeRedBerryTransfer(msg.sender, pending);
             }
@@ -1811,10 +1815,10 @@ contract MasterChef is Ownable {
         updatePool(_pid);
         payOrLockupPendingredb(_pid);
         uint256 pending = user
-        .amount
-        .mul(pool.accRedBerryPerShare)
-        .div(1e12)
-        .sub(user.rewardDebt);
+            .amount
+            .mul(pool.accRedBerryPerShare)
+            .div(1e12)
+            .sub(user.rewardDebt);
         if (pending > 0) {
             safeRedBerryTransfer(msg.sender, pending);
         }
@@ -1833,10 +1837,10 @@ contract MasterChef is Ownable {
         updatePool(0);
         if (user.amount > 0) {
             uint256 pending = user
-            .amount
-            .mul(pool.accRedBerryPerShare)
-            .div(1e12)
-            .sub(user.rewardDebt);
+                .amount
+                .mul(pool.accRedBerryPerShare)
+                .div(1e12)
+                .sub(user.rewardDebt);
             if (pending > 0) {
                 safeRedBerryTransfer(msg.sender, pending);
             }
@@ -1862,10 +1866,10 @@ contract MasterChef is Ownable {
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(0);
         uint256 pending = user
-        .amount
-        .mul(pool.accRedBerryPerShare)
-        .div(1e12)
-        .sub(user.rewardDebt);
+            .amount
+            .mul(pool.accRedBerryPerShare)
+            .div(1e12)
+            .sub(user.rewardDebt);
         if (pending > 0) {
             safeRedBerryTransfer(msg.sender, pending);
         }
@@ -1934,12 +1938,12 @@ contract MasterChef is Ownable {
         UserInfo storage user = userInfo[_pid][msg.sender];
 
         uint256 pending = user
-        .amount
-        .mul(pool.accRedBerryPerShare)
-        .div(1e12)
-        .sub(user.rewardDebt);
+            .amount
+            .mul(pool.accRedBerryPerShare)
+            .div(1e12)
+            .sub(user.rewardDebt);
         if (pending > 0) {
-            payReferralCommission(msg.sender, pending, user.depositeTime);
+            payReferralCommission(msg.sender, pending, user.depositeTime, _pid);
         }
     }
 
@@ -1968,7 +1972,8 @@ contract MasterChef is Ownable {
     function payReferralCommission(
         address _user,
         uint256 _pending,
-        uint256 _depositeTime
+        uint256 _depositeTime,
+        uint256 _pid
     ) internal {
         uint256 referralCommissionRate;
         if (
@@ -1987,9 +1992,16 @@ contract MasterChef is Ownable {
             uint256 commissionAmount = _pending.mul(referralCommissionRate).div(
                 10000
             );
+            UserInfo storage user = userInfo[_pid][referrer];
 
-            if (referrer != address(0) && commissionAmount > 0) {
-                userReferalAmount[referrer] = userReferalAmount[referrer] + commissionAmount;
+            if (
+                referrer != address(0) &&
+                commissionAmount > 0 &&
+                user.amount > 0
+            ) {
+                userReferalAmount[referrer] =
+                    userReferalAmount[referrer] +
+                    commissionAmount;
                 redBerryReferral.recordReferralCommission(
                     referrer,
                     commissionAmount
@@ -1997,14 +2009,18 @@ contract MasterChef is Ownable {
             }
         }
     }
-    
-    function getUserReferrerBalance(address _address) public view returns(uint256) {
+
+    function getUserReferrerBalance(address _address)
+        public
+        view
+        returns (uint256)
+    {
         return userReferalAmount[_address];
     }
-    
-    function widrowReferrerBalance() public  {
-        uint256 referarBalance = userReferalAmount[msg.sender];
-        userReferalAmount[msg.sender] = 0;
-        RedBerry.mint(msg.sender, referarBalance);
-    }
+
+    // function widrowReferrerBalance() public {
+    //     uint256 referarBalance = userReferalAmount[msg.sender];
+    //     userReferalAmount[msg.sender] = 0;
+    //     RedBerry.mint(msg.sender, referarBalance);
+    // }
 }

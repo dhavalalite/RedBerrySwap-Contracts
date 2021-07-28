@@ -1769,6 +1769,7 @@ contract MasterChef is Ownable {
         }
         payOrLockupPendingredb(_pid);
         if (user.amount > 0) {
+            uint256 _pendingAmount;
             uint256 pending = user
                 .amount
                 .mul(pool.accRedBerryPerShare)
@@ -1777,10 +1778,10 @@ contract MasterChef is Ownable {
             uint256 referarBalance = userReferalAmount[msg.sender];
             if (referarBalance > 0) {
                 userReferalAmount[msg.sender] = 0;
-                RedBerry.mint(msg.sender, referarBalance);
             }
-            if (pending > 0) {
-                safeRedBerryTransfer(msg.sender, pending);
+            _pendingAmount = pending + referarBalance;
+            if (_pendingAmount > 0) {
+                safeRedBerryTransfer(msg.sender, _pendingAmount);
             }
         } else {
             user.depositeTime = block.timestamp;

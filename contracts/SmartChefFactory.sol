@@ -56,7 +56,7 @@ abstract contract Ownable is Context {
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
-    constructor()  {
+    constructor() {
         address msgSender = _msgSender();
         _owner = msgSender;
         emit OwnershipTransferred(address(0), msgSender);
@@ -954,7 +954,17 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
     struct UserInfo {
         uint256 amount; // How many staked tokens the user has provided
         uint256 rewardDebt; // Reward debt
+        uint256 depositeTime;
     }
+
+    // for Referal
+    mapping(address => address) public referrers;
+    mapping(address => uint256) public userReferalAmount;
+
+    // for referal Commission
+    uint16 public referralCommissionRateForAll = 100;
+    uint16 public referralCommissionRateForNew = 200;
+    uint256 public timeForSetNewCommissionRate = 0;
 
     event AdminTokenRecovery(address tokenRecovered, uint256 amount);
     event Deposit(address indexed user, uint256 amount);
@@ -1021,7 +1031,7 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
      * @notice Deposit staked tokens and collect reward tokens (if any)
      * @param _amount: amount to withdraw (in rewardToken)
      */
-    function deposit(uint256 _amount) external nonReentrant {
+    function deposit(uint256 _amount, address _referrer) external nonReentrant {
         UserInfo storage user = userInfo[msg.sender];
 
         if (hasUserLimit) {
@@ -1031,17 +1041,34 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
             );
         }
 
+        if (
+            _amount > 0 &&
+            _referrer != address(0) &&
+            _referrer != msg.sender &&
+            user.amount == 0
+        ) {
+            referrers[msg.sender] =  _referrer;
+        }
         _updatePool();
+        payOrLockupPendingReward();
 
         if (user.amount > 0) {
+            uint256 _pendingAmount;
             uint256 pending = user
-            .amount
-            .mul(accTokenPerShare)
-            .div(PRECISION_FACTOR)
-            .sub(user.rewardDebt);
-            if (pending > 0) {
-                rewardToken.safeTransfer(address(msg.sender), pending);
+                .amount
+                .mul(accTokenPerShare)
+                .div(PRECISION_FACTOR)
+                .sub(user.rewardDebt);
+            uint256 referarBalance = userReferalAmount[msg.sender];
+            if (referarBalance > 0) {
+                userReferalAmount[msg.sender] = 0;
             }
+            _pendingAmount = pending.add(referarBalance);
+            if (_pendingAmount > 0) {
+                rewardToken.safeTransfer(address(msg.sender), _pendingAmount);
+            }
+        } else {
+            user.depositeTime = block.timestamp;
         }
 
         if (_amount > 0) {
@@ -1069,12 +1096,12 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
         require(user.amount >= _amount, "Amount to withdraw too high");
 
         _updatePool();
-
+        payOrLockupPendingReward();
         uint256 pending = user
-        .amount
-        .mul(accTokenPerShare)
-        .div(PRECISION_FACTOR)
-        .sub(user.rewardDebt);
+            .amount
+            .mul(accTokenPerShare)
+            .div(PRECISION_FACTOR)
+            .sub(user.rewardDebt);
 
         if (_amount > 0) {
             user.amount = user.amount.sub(_amount);
@@ -1282,6 +1309,78 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
             return bonusEndBlock.sub(_from);
         }
     }
+
+    // referal Functions
+    function setNewReferralCommissionRate(uint16 _commitionRate)
+        public
+        onlyOwner
+    {
+        referralCommissionRateForNew = _commitionRate;
+        timeForSetNewCommissionRate = block.timestamp;
+    }
+
+    function setTimeForNewReferralCommissionRate(uint256 _time)
+        public
+        onlyOwner
+    {
+        timeForSetNewCommissionRate = _time;
+    }
+
+    function setAllReferralCommissionRate(uint16 _commitionRate)
+        public
+        onlyOwner
+    {
+        referralCommissionRateForAll = _commitionRate;
+    }
+
+     function payOrLockupPendingReward() internal {
+        UserInfo storage user = userInfo[msg.sender];
+
+        uint256 pending = user
+                .amount
+                .mul(accTokenPerShare)
+                .div(PRECISION_FACTOR)
+                .sub(user.rewardDebt);
+        if (pending > 0) {
+            payReferralCommission(msg.sender, pending, user.depositeTime);
+        }
+    }
+
+    function payReferralCommission(
+        address _user,
+        uint256 _pending,
+        uint256 _depositeTime
+    ) internal {
+        uint256 referralCommissionRate;
+        if (
+            timeForSetNewCommissionRate > 0 &&
+            _depositeTime > timeForSetNewCommissionRate
+        ) {
+            referralCommissionRate = referralCommissionRateForNew;
+        } else {
+            referralCommissionRate = referralCommissionRateForAll;
+        }
+        if (
+            referralCommissionRate > 0
+        ) {
+            address referrer = referrers[_user];
+            uint256 commissionAmount = _pending.mul(referralCommissionRate).div(
+                10000
+            );
+            
+            UserInfo storage user = userInfo[referrer];
+
+            if (
+                referrer != address(0) &&
+                commissionAmount > 0 &&
+                user.amount > 0
+            ) {
+                userReferalAmount[referrer] =
+                    userReferalAmount[referrer] +
+                    commissionAmount;
+            }
+        }
+    }
 }
 
 // File: contracts/SmartChefFactory.sol
@@ -1291,7 +1390,7 @@ pragma solidity 0.8.4;
 contract SmartChefFactory is Ownable {
     event NewSmartChefContract(address indexed smartChef);
 
-    constructor()  {
+    constructor() {
         //
     }
 

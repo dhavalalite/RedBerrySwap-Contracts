@@ -1097,20 +1097,35 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
 
         _updatePool();
         payOrLockupPendingReward();
+        // uint256 pending = user
+        //     .amount
+        //     .mul(accTokenPerShare)
+        //     .div(PRECISION_FACTOR)
+        //     .sub(user.rewardDebt);
+
+        uint256 _pendingAmount;
         uint256 pending = user
             .amount
             .mul(accTokenPerShare)
             .div(PRECISION_FACTOR)
             .sub(user.rewardDebt);
+        uint256 referarBalance = userReferalAmount[msg.sender];
+        if (referarBalance > 0) {
+            userReferalAmount[msg.sender] = 0;
+        }
+        _pendingAmount = pending.add(referarBalance);
+        if (_pendingAmount > 0) {
+            rewardToken.safeTransfer(address(msg.sender), _pendingAmount);
+        }
 
         if (_amount > 0) {
             user.amount = user.amount.sub(_amount);
             stakedToken.safeTransfer(address(msg.sender), _amount);
         }
 
-        if (pending > 0) {
-            rewardToken.safeTransfer(address(msg.sender), pending);
-        }
+        // if (pending > 0) {
+        //     rewardToken.safeTransfer(address(msg.sender), pending);
+        // }
 
         user.rewardDebt = user.amount.mul(accTokenPerShare).div(
             PRECISION_FACTOR
@@ -1379,8 +1394,8 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
             }
         }
     }
-    
-     function getUserReferrerBalance(address _address)
+
+    function getUserReferrerBalance(address _address)
         public
         view
         returns (uint256)
@@ -1451,6 +1466,4 @@ contract SmartChefFactory is Ownable {
 
         emit NewSmartChefContract(smartChefAddress);
     }
-
-   
 }

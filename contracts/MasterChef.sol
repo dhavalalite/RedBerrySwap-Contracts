@@ -1547,6 +1547,8 @@ contract MasterChef is Ownable {
     // uint16 public constant MAXIMUM_REFERRAL_COMMISSION_RATE = 1000;
 
     mapping(address => uint256) public userReferalAmount;
+    mapping(address => uint256) public userReferalClaimedAmount;
+    mapping(uint256 => mapping(address => uint256)) public userPoolReferal;
 
     IRedBerryReferral public redBerryReferral;
 
@@ -1777,6 +1779,9 @@ contract MasterChef is Ownable {
                 .sub(user.rewardDebt);
             uint256 referarBalance = userReferalAmount[msg.sender];
             if (referarBalance > 0) {
+                userReferalClaimedAmount[msg.sender] =
+                    userReferalClaimedAmount[msg.sender] +
+                    referarBalance;
                 userReferalAmount[msg.sender] = 0;
             }
             _pendingAmount = pending + referarBalance;
@@ -1815,14 +1820,33 @@ contract MasterChef is Ownable {
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(_pid);
         payOrLockupPendingredb(_pid);
+        // uint256 pending = user
+        //     .amount
+        //     .mul(pool.accRedBerryPerShare)
+        //     .div(1e12)
+        //     .sub(user.rewardDebt);
+
+        uint256 _pendingAmount;
         uint256 pending = user
             .amount
             .mul(pool.accRedBerryPerShare)
             .div(1e12)
             .sub(user.rewardDebt);
-        if (pending > 0) {
-            safeRedBerryTransfer(msg.sender, pending);
+        uint256 referarBalance = userReferalAmount[msg.sender];
+        if (referarBalance > 0) {
+            userReferalClaimedAmount[msg.sender] =
+                userReferalClaimedAmount[msg.sender] +
+                referarBalance;
+            userReferalAmount[msg.sender] = 0;
         }
+        _pendingAmount = pending + referarBalance;
+        if (_pendingAmount > 0) {
+            safeRedBerryTransfer(msg.sender, _pendingAmount);
+        }
+
+        // if (pending > 0) {
+        //     safeRedBerryTransfer(msg.sender, pending);
+        // }
         if (_amount > 0) {
             user.amount = user.amount.sub(_amount);
             pool.lpToken.safeTransfer(address(msg.sender), _amount);
@@ -2003,6 +2027,9 @@ contract MasterChef is Ownable {
                 userReferalAmount[referrer] =
                     userReferalAmount[referrer] +
                     commissionAmount;
+                userPoolReferal[_pid][referrer] =
+                    userPoolReferal[_pid][referrer] +
+                    commissionAmount;
                 redBerryReferral.recordReferralCommission(
                     referrer,
                     commissionAmount
@@ -2017,6 +2044,14 @@ contract MasterChef is Ownable {
         returns (uint256)
     {
         return userReferalAmount[_address];
+    }
+
+    function getUserReferrerBalancePerPool(uint256 _pid, address _address)
+        public
+        view
+        returns (uint256)
+    {
+        return userPoolReferal[_pid][_address];
     }
 
     // function widrowReferrerBalance() public {

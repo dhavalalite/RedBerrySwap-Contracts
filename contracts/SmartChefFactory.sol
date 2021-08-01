@@ -6,7 +6,7 @@
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.4;
+pragma solidity ^0.8.4;
 
 /*
  * @dev Provides information about the current execution context, including the
@@ -30,8 +30,6 @@ abstract contract Context {
 }
 
 // File: @openzeppelin/contracts/access/Ownable.sol
-
-pragma solidity 0.8.4;
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -104,8 +102,6 @@ abstract contract Ownable is Context {
 }
 
 // File: bsc-library/contracts/IBEP20.sol
-
-pragma solidity >=0.4.0;
 
 interface IBEP20 {
     /**
@@ -212,8 +208,6 @@ interface IBEP20 {
 }
 
 // File: @openzeppelin/contracts/math/SafeMath.sol
-
-pragma solidity 0.8.4;
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
@@ -460,8 +454,6 @@ library SafeMath {
 
 // File: @openzeppelin/contracts/utils/ReentrancyGuard.sol
 
-pragma solidity 0.8.4;
-
 /**
  * @dev Contract module that helps prevent reentrant calls to a function.
  *
@@ -522,8 +514,6 @@ abstract contract ReentrancyGuard {
 }
 
 // File: @openzeppelin/contracts/utils/Address.sol
-
-pragma solidity 0.8.4;
 
 /**
  * @dev Collection of functions related to the address type
@@ -777,8 +767,6 @@ library Address {
 
 // File: bsc-library/contracts/SafeBEP20.sol
 
-pragma solidity 0.8.4;
-
 /**
  * @title SafeBEP20
  * @dev Wrappers around BEP20 operations that throw on failure (when the token
@@ -906,8 +894,6 @@ library SafeBEP20 {
 
 // File: contracts/SmartChefInitializable.sol
 
-pragma solidity 0.8.4;
-
 contract SmartChefInitializable is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeBEP20 for IBEP20;
@@ -917,6 +903,9 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
 
     // Whether a limit is set for users
     bool public hasUserLimit;
+    
+    // Whether a limit is set for pool
+    bool public hasPoolLimit;
 
     // Whether it is initialized
     bool public isInitialized;
@@ -933,8 +922,11 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
     // The block number of the last pool update
     uint256 public lastRewardBlock;
 
-    // The pool limit (0 if none)
+    // The pool limit for users(0 if none)
     uint256 public poolLimitPerUser;
+    
+    // The pool limit (0 if none)
+    uint256 public poolLimit;
 
     // REDB tokens created per block.
     uint256 public rewardPerBlock;
@@ -947,6 +939,9 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
 
     // The staked token
     IBEP20 public stakedToken;
+    
+    // Number of total staked token
+    uint256 public totalStakedtoken;
 
     // Info of each user that stakes tokens (stakedToken)
     mapping(address => UserInfo) public userInfo;
@@ -974,6 +969,7 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
     event NewPoolLimit(uint256 poolLimitPerUser);
     event RewardsStop(uint256 blockNumber);
     event Withdraw(address indexed user, uint256 amount);
+    event TokenRecovery(address indexed tokenAddress, uint tokenAmount);
 
     constructor() {
         SMART_CHEF_FACTORY = msg.sender;
@@ -1014,6 +1010,9 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
             hasUserLimit = true;
             poolLimitPerUser = _poolLimitPerUser;
         }
+        
+        hasPoolLimit = false;
+        poolLimit = 0;
 
         uint256 decimalsRewardToken = uint256(rewardToken.decimals());
         require(decimalsRewardToken < 30, "Must be inferior to 30");
@@ -1040,6 +1039,12 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
                 "User amount above limit"
             );
         }
+        
+        if (hasPoolLimit) {
+            require(
+                _amount.add(totalStakedtoken) <= poolLimit,
+                "Pool amount above limit");
+        }  
 
         if (
             _amount > 0 &&
@@ -1083,6 +1088,8 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
         user.rewardDebt = user.amount.mul(accTokenPerShare).div(
             PRECISION_FACTOR
         );
+        
+        totalStakedtoken = totalStakedtoken.add(_amount);
 
         emit Deposit(msg.sender, _amount);
     }
@@ -1097,11 +1104,6 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
 
         _updatePool();
         payOrLockupPendingReward();
-        // uint256 pending = user
-        //     .amount
-        //     .mul(accTokenPerShare)
-        //     .div(PRECISION_FACTOR)
-        //     .sub(user.rewardDebt);
 
         uint256 _pendingAmount;
         uint256 pending = user
@@ -1123,13 +1125,11 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
             stakedToken.safeTransfer(address(msg.sender), _amount);
         }
 
-        // if (pending > 0) {
-        //     rewardToken.safeTransfer(address(msg.sender), pending);
-        // }
-
         user.rewardDebt = user.amount.mul(accTokenPerShare).div(
             PRECISION_FACTOR
         );
+        
+        totalStakedtoken = totalStakedtoken.sub(_amount);
 
         emit Withdraw(msg.sender, _amount);
     }
@@ -1144,9 +1144,12 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
         user.amount = 0;
         user.rewardDebt = 0;
 
+        totalStakedtoken = totalStakedtoken.sub(amountToTransfer);
+        
         if (amountToTransfer > 0) {
             stakedToken.safeTransfer(address(msg.sender), amountToTransfer);
         }
+        
 
         emit EmergencyWithdraw(msg.sender, user.amount);
     }
@@ -1213,6 +1216,30 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
             poolLimitPerUser = 0;
         }
         emit NewPoolLimit(poolLimitPerUser);
+    }
+    
+    /*
+     * @notice Update pool limit 
+     * @dev Only callable by owner.
+     * @param _hasPoolLimit: whether the limit remains forced
+     * @param _poolLimit: new pool limit 
+     */
+    function updatePoolLimit(
+        bool _hasPoolLimit,
+        uint256 _poolLimit
+    ) external onlyOwner {
+        require(_hasPoolLimit, "Must be set");
+        if (_hasPoolLimit) {
+            require(
+                _poolLimit > poolLimit,
+                "New limit must be higher"
+            );
+            poolLimit = _poolLimit;
+        } else {
+            hasPoolLimit = _hasPoolLimit;
+            poolLimit = 0;
+        }
+        emit NewPoolLimit(poolLimit);
     }
 
     /*
@@ -1402,14 +1429,20 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
     {
         return userReferalAmount[_address];
     }
+    
+    function recoverWrongToken(IBEP20 _token, uint256 _tokenAmount) public onlyOwner{
+        require(_token != stakedToken, "Cannot withdraw Staked  token");
+        
+        IBEP20(_token).transfer(address(msg.sender), _tokenAmount);
+        emit TokenRecovery(address(_token), _tokenAmount);
+    }
 }
 
 // File: contracts/SmartChefFactory.sol
 
-pragma solidity 0.8.4;
-
 contract SmartChefFactory is Ownable {
     event NewSmartChefContract(address indexed smartChef);
+    event TokenRecovery(address indexed tokenAddress, uint tokenAmount);
 
     constructor() {
         //
@@ -1465,5 +1498,10 @@ contract SmartChefFactory is Ownable {
         );
 
         emit NewSmartChefContract(smartChefAddress);
+    }
+    
+    function recoverWrongToken(IBEP20 _token, uint256 _tokenAmount) public onlyOwner{
+        IBEP20(_token).transfer(address(msg.sender), _tokenAmount);
+        emit TokenRecovery(address(_token), _tokenAmount);
     }
 }

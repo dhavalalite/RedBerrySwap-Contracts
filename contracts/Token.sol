@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.4;
+pragma solidity ^0.8.4;
 
 //
 /*
@@ -835,7 +835,7 @@ contract BEP20 is Context, IBEP20, Ownable {
         address sender,
         address recipient,
         uint256 amount
-    ) internal {
+    ) internal virtual{
         require(sender != address(0), "BEP20: transfer from the zero address");
         require(recipient != address(0), "BEP20: transfer to the zero address");
 
@@ -965,6 +965,11 @@ contract RedBerry is BEP20 {
         uint256 previousRate,
         uint256 newRate
     );
+    
+    event TokenRecovery(
+        address indexed tokenAddress,
+        uint tokenAmount
+    );
 
     modifier onlyOperator() {
         require(
@@ -972,6 +977,13 @@ contract RedBerry is BEP20 {
             "operator: caller is not the operator"
         );
         _;
+    }
+    
+    modifier transferTaxFree {
+        uint16 _transferTaxRate = transferTaxRate;
+        transferTaxRate = 0;
+        _;
+        transferTaxRate = _transferTaxRate;
     }
     
     modifier antiWhale(address sender, address recipient, uint256 amount) {
@@ -999,15 +1011,26 @@ contract RedBerry is BEP20 {
         return (totalSupply() * maxTransferAmountRate)/(10000);
     }
     
-    function transfer(address recipient, uint256 amount)
-        public
-        override
-        virtual
-        antiWhale(msg.sender, recipient, amount)
-        returns (bool)
-    {
-        _transfer(_msgSender(), recipient, amount);
-        return true;
+    function _transfer(address sender, address recipient, uint256 amount) internal virtual override antiWhale(sender, recipient, amount) {
+        
+        if (recipient == BURN_ADDRESS || transferTaxRate == 0) {
+            super._transfer(sender, recipient, amount);
+        } else {
+            // default tax is 5% of every transfer
+            uint256 taxAmount = (amount * transferTaxRate) / 10000;
+            uint256 burnAmount = (taxAmount * burnRate) / 100;
+            uint256 liquidityAmount = taxAmount - burnAmount;
+            require(taxAmount == burnAmount + liquidityAmount, "REDBERRY::transfer: Burn value invalid");
+    
+            // default 95% of transfer sent to recipient
+            uint256 sendAmount = amount - taxAmount;
+            require(amount == sendAmount + taxAmount, "REDBERRY::transfer: Tax value invalid");
+    
+            super._transfer(sender, BURN_ADDRESS, burnAmount);
+            super._transfer(sender, _operator, liquidityAmount);
+            super._transfer(sender, recipient, sendAmount);
+            amount = sendAmount;
+        }
     }
 
     /**
@@ -1031,6 +1054,13 @@ contract RedBerry is BEP20 {
         require(_maxTransferAmountRate <= 10000, "REDBERRY::updateMaxTransferAmountRate: Max transfer amount rate must not exceed the maximum rate.");
         emit MaxTransferAmountRateUpdated(msg.sender, maxTransferAmountRate, _maxTransferAmountRate);
         maxTransferAmountRate = _maxTransferAmountRate;
+    }
+    
+    /**
+     * @dev Returns the address of the current operator.
+     */
+    function operator() public view returns (address) {
+        return _operator;
     }
     
     // Copied and modified from YAM code:
@@ -1080,6 +1110,18 @@ contract RedBerry is BEP20 {
         uint256 previousBalance,
         uint256 newBalance
     );
+
+    
+    /**
+     * @dev Transfers operator of the contract to a new account (`newOperator`).
+     * Can only be called by the current operator.
+     */
+    function transferOperator(address newOperator) public onlyOperator {
+        require(newOperator != address(0), "PANTHER::transferOperator: new operator is the zero address");
+        emit OperatorTransferred(_operator, newOperator);
+        _operator = newOperator;
+    }
+
 
     /**
      * @notice Delegate votes from `msg.sender` to `delegatee`
@@ -1286,5 +1328,10 @@ contract RedBerry is BEP20 {
             chainId := chainid()
         }
         return chainId;
+    }
+    
+    function recoverWrongToken(IBEP20 _token, uint256 _tokenAmount) public onlyOperator{
+        IBEP20(_token).transfer(address(msg.sender), _tokenAmount);
+        emit TokenRecovery(address(_token), _tokenAmount);
     }
 }

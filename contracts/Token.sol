@@ -1117,7 +1117,7 @@ contract RedBerry is BEP20 {
      * Can only be called by the current operator.
      */
     function transferOperator(address newOperator) public onlyOperator {
-        require(newOperator != address(0), "PANTHER::transferOperator: new operator is the zero address");
+        require(newOperator != address(0), "REDB::transferOperator: new operator is the zero address");
         emit OperatorTransferred(_operator, newOperator);
         _operator = newOperator;
     }

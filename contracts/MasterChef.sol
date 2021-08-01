@@ -1182,20 +1182,145 @@ contract BEP20 is Context, IBEP20, Ownable {
 }
 
 // RedBerryToken with Governance.
-contract RedBerryToken is BEP20("RedBerry", "REDB") {
+contract RedBerry is BEP20 {
+    // Transfer tax rate in basis points. (default 5%)
+    uint16 public transferTaxRate = 500;
+    // Burn rate % of transfer tax. (default 20% x 5% = 1% of total amount).
+    uint16 public burnRate = 20;
+    // Burn address
+    address public constant BURN_ADDRESS =
+        0x000000000000000000000000000000000000dEaD;
+
+    // The operator can only update the transfer tax rate
+    address private _operator;
+
+    // Max transfer amount rate in basis points. (default is 0.5% of total supply)
+    uint16 public maxTransferAmountRate = 50;
+    
+    event OperatorTransferred(
+        address indexed previousOperator,
+        address indexed newOperator
+    );
+    event TransferTaxRateUpdated(
+        address indexed operator,
+        uint256 previousRate,
+        uint256 newRate
+    );
+    event BurnRateUpdated(
+        address indexed operator,
+        uint256 previousRate,
+        uint256 newRate
+    );
+    event MaxTransferAmountRateUpdated(
+        address indexed operator,
+        uint256 previousRate,
+        uint256 newRate
+    );
+    
+    event TokenRecovery(
+        address indexed tokenAddress,
+        uint tokenAmount
+    );
+
+    modifier onlyOperator() {
+        require(
+            _operator == msg.sender,
+            "operator: caller is not the operator"
+        );
+        _;
+    }
+    
+    modifier transferTaxFree {
+        uint16 _transferTaxRate = transferTaxRate;
+        transferTaxRate = 0;
+        _;
+        transferTaxRate = _transferTaxRate;
+    }
+    
+    modifier antiWhale(address sender, address recipient, uint256 amount) {
+        if (maxTransferAmount() > 0) {
+            require(amount <= maxTransferAmount(), "REDBERRY::antiWhale: Transfer amount exceeds the maxTransferAmount");
+        }
+        _;
+    }
+
+    constructor() BEP20("RedBerry", "REDB") {
+        _operator = _msgSender();
+        emit OperatorTransferred(address(0), _operator);
+    }
+
     /// @notice Creates `_amount` token to `_to`. Must only be called by the owner (MasterChef).
     function mint(address _to, uint256 _amount) public onlyOwner {
         _mint(_to, _amount);
         _moveDelegates(address(0), _delegates[_to], _amount);
     }
+    
+    /**
+     * @dev Returns the max transfer amount.
+     */
+    function maxTransferAmount() public view returns (uint256) {
+        return (totalSupply() * maxTransferAmountRate)/(10000);
+    }
+    
+    function _transfer(address sender, address recipient, uint256 amount) internal virtual override antiWhale(sender, recipient, amount) {
+        
+        if (recipient == BURN_ADDRESS || transferTaxRate == 0) {
+            super._transfer(sender, recipient, amount);
+        } else {
+            // default tax is 5% of every transfer
+            uint256 taxAmount = (amount * transferTaxRate) / 10000;
+            uint256 burnAmount = (taxAmount * burnRate) / 100;
+            uint256 liquidityAmount = taxAmount - burnAmount;
+            require(taxAmount == burnAmount + liquidityAmount, "REDBERRY::transfer: Burn value invalid");
+    
+            // default 95% of transfer sent to recipient
+            uint256 sendAmount = amount - taxAmount;
+            require(amount == sendAmount + taxAmount, "REDBERRY::transfer: Tax value invalid");
+    
+            super._transfer(sender, BURN_ADDRESS, burnAmount);
+            super._transfer(sender, _operator, liquidityAmount);
+            super._transfer(sender, recipient, sendAmount);
+            amount = sendAmount;
+        }
+    }
 
+    /**
+     * @dev Update the burn rate.
+     * Can only be called by the current operator.
+     */
+    function updateBurnRate(uint16 _burnRate) public onlyOperator {
+        require(
+            _burnRate <= 100,
+            "REDBERRY::updateBurnRate: Burn rate must not exceed the maximum rate."
+        );
+        emit BurnRateUpdated(msg.sender, burnRate, _burnRate);
+        burnRate = _burnRate;
+    }
+
+    /**
+     * @dev Update the max transfer amount rate.
+     * Can only be called by the current operator.
+     */
+    function updateMaxTransferAmountRate(uint16 _maxTransferAmountRate) public onlyOperator {
+        require(_maxTransferAmountRate <= 10000, "REDBERRY::updateMaxTransferAmountRate: Max transfer amount rate must not exceed the maximum rate.");
+        emit MaxTransferAmountRateUpdated(msg.sender, maxTransferAmountRate, _maxTransferAmountRate);
+        maxTransferAmountRate = _maxTransferAmountRate;
+    }
+    
+    /**
+     * @dev Returns the address of the current operator.
+     */
+    function operator() public view returns (address) {
+        return _operator;
+    }
+    
     // Copied and modified from YAM code:
     // https://github.com/yam-finance/yam-protocol/blob/master/contracts/token/YAMGovernanceStorage.sol
     // https://github.com/yam-finance/yam-protocol/blob/master/contracts/token/YAMGovernance.sol
     // Which is copied and modified from COMPOUND:
     // https://github.com/compound-finance/compound-protocol/blob/master/contracts/Governance/Comp.sol
 
-    // / @notice A record of each accounts delegate
+    /// @notice A record of each accounts delegate
     mapping(address => address) internal _delegates;
 
     /// @notice A checkpoint for marking number of votes from a given block
@@ -1236,6 +1361,18 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
         uint256 previousBalance,
         uint256 newBalance
     );
+
+    
+    /**
+     * @dev Transfers operator of the contract to a new account (`newOperator`).
+     * Can only be called by the current operator.
+     */
+    function transferOperator(address newOperator) public onlyOperator {
+        require(newOperator != address(0), "REDB::transferOperator: new operator is the zero address");
+        emit OperatorTransferred(_operator, newOperator);
+        _operator = newOperator;
+    }
+
 
     /**
      * @notice Delegate votes from `msg.sender` to `delegatee`
@@ -1442,6 +1579,11 @@ contract RedBerryToken is BEP20("RedBerry", "REDB") {
             chainId := chainid()
         }
         return chainId;
+    }
+    
+    function recoverWrongToken(IBEP20 _token, uint256 _tokenAmount) public onlyOperator{
+        IBEP20(_token).transfer(address(msg.sender), _tokenAmount);
+        emit TokenRecovery(address(_token), _tokenAmount);
     }
 }
 

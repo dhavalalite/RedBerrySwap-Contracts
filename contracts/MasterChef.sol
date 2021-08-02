@@ -1086,7 +1086,7 @@ contract BEP20 is Context, IBEP20, Ownable {
         address sender,
         address recipient,
         uint256 amount
-    ) internal {
+    ) internal virtual{
         require(sender != address(0), "BEP20: transfer from the zero address");
         require(recipient != address(0), "BEP20: transfer to the zero address");
 
@@ -1182,7 +1182,7 @@ contract BEP20 is Context, IBEP20, Ownable {
 }
 
 // RedBerryToken with Governance.
-contract RedBerry is BEP20 {
+contract RedBerryToken is BEP20 {
     // Transfer tax rate in basis points. (default 5%)
     uint16 public transferTaxRate = 500;
     // Burn rate % of transfer tax. (default 20% x 5% = 1% of total amount).

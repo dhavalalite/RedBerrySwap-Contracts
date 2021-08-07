@@ -1032,6 +1032,16 @@ contract RedBerry is BEP20 {
             amount = sendAmount;
         }
     }
+    
+    /**
+     * @dev Update the transfer tax rate.
+     * Can only be called by the current operator.
+     */
+    function updateTransferTaxRate(uint16 _transferTaxRate) public onlyOperator {
+        require(_transferTaxRate <= MAXIMUM_TRANSFER_TAX_RATE, "REDB::updateTransferTaxRate: Transfer tax rate must not exceed the maximum rate.");
+        emit TransferTaxRateUpdated(msg.sender, transferTaxRate, _transferTaxRate);
+        transferTaxRate = _transferTaxRate;
+    }
 
     /**
      * @dev Update the burn rate.

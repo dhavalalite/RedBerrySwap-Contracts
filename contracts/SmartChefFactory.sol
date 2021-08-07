@@ -950,6 +950,7 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
         uint256 amount; // How many staked tokens the user has provided
         uint256 rewardDebt; // Reward debt
         uint256 depositeTime;
+        uint256 totalClaimedAmount;
     }
 
     // for Referal
@@ -1069,6 +1070,7 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
                 userReferalAmount[msg.sender] = 0;
             }
             _pendingAmount = pending.add(referarBalance);
+            user.totalClaimedAmount = user.totalClaimedAmount.add(pending);
             if (_pendingAmount > 0) {
                 rewardToken.safeTransfer(address(msg.sender), _pendingAmount);
             }
@@ -1116,6 +1118,7 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
             userReferalAmount[msg.sender] = 0;
         }
         _pendingAmount = pending.add(referarBalance);
+        user.totalClaimedAmount = user.totalClaimedAmount.add(pending);
         if (_pendingAmount > 0) {
             rewardToken.safeTransfer(address(msg.sender), _pendingAmount);
         }

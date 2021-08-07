@@ -1615,6 +1615,7 @@ contract MasterChef is Ownable {
         uint256 amount; // How many LP tokens the user has provided.
         uint256 rewardDebt; // Reward debt. See explanation below.
         uint256 depositeTime;
+        uint256 totalClaimedAmount;
         //
         // We do some fancy math here. Basically, any point in time, the amount of REDBs
         // entitled to a user but is pending to be distributed is:
@@ -1672,9 +1673,9 @@ contract MasterChef is Ownable {
     // Max referral commission rate: 10%.
     // uint16 public constant MAXIMUM_REFERRAL_COMMISSION_RATE = 1000;
 
-    mapping(address => uint256) public userReferalAmount;
+    mapping(address => uint256) private userReferalAmount;
     mapping(address => uint256) public userReferalClaimedAmount;
-    mapping(uint256 => mapping(address => uint256)) public userPoolReferal;
+    mapping(uint256 => mapping(address => uint256)) private userPoolReferal;
     mapping(IBEP20 => bool) public tokenFarmExists;
 
     IRedBerryReferral public redBerryReferral;
@@ -1944,6 +1945,7 @@ contract MasterChef is Ownable {
                 userReferalAmount[msg.sender] = 0;
             }
             _pendingAmount = pending + referarBalance;
+            user.totalClaimedAmount = user.totalClaimedAmount + pending;
             if (_pendingAmount > 0) {
                 safeRedBerryTransfer(msg.sender, _pendingAmount);
             }
@@ -2001,6 +2003,7 @@ contract MasterChef is Ownable {
             userReferalAmount[msg.sender] = 0;
         }
         _pendingAmount = pending + referarBalance;
+        user.totalClaimedAmount = user.totalClaimedAmount + pending;
         if (_pendingAmount > 0) {
             safeRedBerryTransfer(msg.sender, _pendingAmount);
         }

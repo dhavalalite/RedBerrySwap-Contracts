@@ -1086,7 +1086,7 @@ contract BEP20 is Context, IBEP20, Ownable {
         address sender,
         address recipient,
         uint256 amount
-    ) internal virtual{
+    ) internal virtual {
         require(sender != address(0), "BEP20: transfer from the zero address");
         require(recipient != address(0), "BEP20: transfer to the zero address");
 
@@ -1196,7 +1196,7 @@ contract RedBerryToken is BEP20 {
 
     // Max transfer amount rate in basis points. (default is 0.5% of total supply)
     uint16 public maxTransferAmountRate = 50;
-    
+
     event OperatorTransferred(
         address indexed previousOperator,
         address indexed newOperator
@@ -1216,11 +1216,8 @@ contract RedBerryToken is BEP20 {
         uint256 previousRate,
         uint256 newRate
     );
-    
-    event TokenRecovery(
-        address indexed tokenAddress,
-        uint tokenAmount
-    );
+
+    event TokenRecovery(address indexed tokenAddress, uint256 tokenAmount);
 
     modifier onlyOperator() {
         require(
@@ -1229,17 +1226,24 @@ contract RedBerryToken is BEP20 {
         );
         _;
     }
-    
-    modifier transferTaxFree {
+
+    modifier transferTaxFree() {
         uint16 _transferTaxRate = transferTaxRate;
         transferTaxRate = 0;
         _;
         transferTaxRate = _transferTaxRate;
     }
-    
-    modifier antiWhale(address sender, address recipient, uint256 amount) {
+
+    modifier antiWhale(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) {
         if (maxTransferAmount() > 0) {
-            require(amount <= maxTransferAmount(), "REDBERRY::antiWhale: Transfer amount exceeds the maxTransferAmount");
+            require(
+                amount <= maxTransferAmount(),
+                "REDBERRY::antiWhale: Transfer amount exceeds the maxTransferAmount"
+            );
         }
         _;
     }
@@ -1254,16 +1258,19 @@ contract RedBerryToken is BEP20 {
         _mint(_to, _amount);
         _moveDelegates(address(0), _delegates[_to], _amount);
     }
-    
+
     /**
      * @dev Returns the max transfer amount.
      */
     function maxTransferAmount() public view returns (uint256) {
-        return (totalSupply() * maxTransferAmountRate)/(10000);
+        return (totalSupply() * maxTransferAmountRate) / (10000);
     }
-    
-    function _transfer(address sender, address recipient, uint256 amount) internal virtual override antiWhale(sender, recipient, amount) {
-        
+
+    function _transfer(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) internal virtual override antiWhale(sender, recipient, amount) {
         if (recipient == BURN_ADDRESS || transferTaxRate == 0) {
             super._transfer(sender, recipient, amount);
         } else {
@@ -1271,12 +1278,18 @@ contract RedBerryToken is BEP20 {
             uint256 taxAmount = (amount * transferTaxRate) / 10000;
             uint256 burnAmount = (taxAmount * burnRate) / 100;
             uint256 liquidityAmount = taxAmount - burnAmount;
-            require(taxAmount == burnAmount + liquidityAmount, "REDBERRY::transfer: Burn value invalid");
-    
+            require(
+                taxAmount == burnAmount + liquidityAmount,
+                "REDBERRY::transfer: Burn value invalid"
+            );
+
             // default 95% of transfer sent to recipient
             uint256 sendAmount = amount - taxAmount;
-            require(amount == sendAmount + taxAmount, "REDBERRY::transfer: Tax value invalid");
-    
+            require(
+                amount == sendAmount + taxAmount,
+                "REDBERRY::transfer: Tax value invalid"
+            );
+
             super._transfer(sender, BURN_ADDRESS, burnAmount);
             super._transfer(sender, _operator, liquidityAmount);
             super._transfer(sender, recipient, sendAmount);
@@ -1301,19 +1314,29 @@ contract RedBerryToken is BEP20 {
      * @dev Update the max transfer amount rate.
      * Can only be called by the current operator.
      */
-    function updateMaxTransferAmountRate(uint16 _maxTransferAmountRate) public onlyOperator {
-        require(_maxTransferAmountRate <= 10000, "REDBERRY::updateMaxTransferAmountRate: Max transfer amount rate must not exceed the maximum rate.");
-        emit MaxTransferAmountRateUpdated(msg.sender, maxTransferAmountRate, _maxTransferAmountRate);
+    function updateMaxTransferAmountRate(uint16 _maxTransferAmountRate)
+        public
+        onlyOperator
+    {
+        require(
+            _maxTransferAmountRate <= 10000,
+            "REDBERRY::updateMaxTransferAmountRate: Max transfer amount rate must not exceed the maximum rate."
+        );
+        emit MaxTransferAmountRateUpdated(
+            msg.sender,
+            maxTransferAmountRate,
+            _maxTransferAmountRate
+        );
         maxTransferAmountRate = _maxTransferAmountRate;
     }
-    
+
     /**
      * @dev Returns the address of the current operator.
      */
     function operator() public view returns (address) {
         return _operator;
     }
-    
+
     // Copied and modified from YAM code:
     // https://github.com/yam-finance/yam-protocol/blob/master/contracts/token/YAMGovernanceStorage.sol
     // https://github.com/yam-finance/yam-protocol/blob/master/contracts/token/YAMGovernance.sol
@@ -1362,17 +1385,18 @@ contract RedBerryToken is BEP20 {
         uint256 newBalance
     );
 
-    
     /**
      * @dev Transfers operator of the contract to a new account (`newOperator`).
      * Can only be called by the current operator.
      */
     function transferOperator(address newOperator) public onlyOperator {
-        require(newOperator != address(0), "REDB::transferOperator: new operator is the zero address");
+        require(
+            newOperator != address(0),
+            "REDB::transferOperator: new operator is the zero address"
+        );
         emit OperatorTransferred(_operator, newOperator);
         _operator = newOperator;
     }
-
 
     /**
      * @notice Delegate votes from `msg.sender` to `delegatee`
@@ -1580,8 +1604,11 @@ contract RedBerryToken is BEP20 {
         }
         return chainId;
     }
-    
-    function recoverWrongToken(IBEP20 _token, uint256 _tokenAmount) public onlyOperator{
+
+    function recoverWrongToken(IBEP20 _token, uint256 _tokenAmount)
+        public
+        onlyOperator
+    {
         IBEP20(_token).transfer(address(msg.sender), _tokenAmount);
         emit TokenRecovery(address(_token), _tokenAmount);
     }
@@ -1590,7 +1617,6 @@ contract RedBerryToken is BEP20 {
 // File: contracts\MasterChef.sol
 
 interface IMigratorChef {
-    
     // Take the current LP token address and return the new LP token address.
     // Migrator should have full access to the caller's LP token.
     // Return the new LP token address.
@@ -1673,10 +1699,15 @@ contract MasterChef is Ownable {
     // Max referral commission rate: 10%.
     // uint16 public constant MAXIMUM_REFERRAL_COMMISSION_RATE = 1000;
 
-    mapping(address => uint256) private userReferalAmount;
-    mapping(address => uint256) public userReferalClaimedAmount;
-    mapping(uint256 => mapping(address => uint256)) private userPoolReferal;
+    mapping(uint256 => mapping(address => uint256)) public userReferalAmount;
+    mapping(uint256 => mapping(address => uint256))
+        public userReferalClaimedAmount;
+    mapping(uint256 => mapping(address => uint256)) public userPoolReferal;
     mapping(IBEP20 => bool) public tokenFarmExists;
+
+    // for white listed user
+    mapping(address => bool) public whilistedUser;
+    address[] public whilistedUserList;
 
     IRedBerryReferral public redBerryReferral;
 
@@ -1687,7 +1718,7 @@ contract MasterChef is Ownable {
         uint256 indexed pid,
         uint256 amount
     );
-    event TokenRecovery(address indexed tokenAddress, uint tokenAmount);
+    event TokenRecovery(address indexed tokenAddress, uint256 tokenAmount);
 
     constructor(
         RedBerryToken _redBerry,
@@ -1787,11 +1818,11 @@ contract MasterChef is Ownable {
             updateStakingPool();
         }
     }
-    
+
     function pauseFarm(uint256 _pid) public onlyOwner {
         poolInfo[_pid].pause = true;
     }
-    
+
     function unpauseFarm(uint256 _pid) public onlyOwner {
         poolInfo[_pid].pause = false;
     }
@@ -1909,23 +1940,34 @@ contract MasterChef is Ownable {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
-    
-        require(!pool.pause, "PAUSED");
-        
-        if(pool.poolLimit > 0){
-            require(_amount.add(pool.totalStaked) <= pool.poolLimit, "Pool amount above limit");
+
+        if (_amount > 0) {
+            require(!pool.pause, "PAUSED");
         }
-        
-        if(pool.poolLimitPerUser > 0){
-            require(_amount.add(user.amount) <= pool.poolLimitPerUser, "User amount above limit");
+
+        if (whilistedUser[msg.sender] != true) {
+            if (pool.poolLimit > 0) {
+                require(
+                    _amount.add(pool.totalStaked) <= pool.poolLimit,
+                    "Pool amount above limit"
+                );
+            }
+
+            if (pool.poolLimitPerUser > 0) {
+                require(
+                    _amount.add(user.amount) <= pool.poolLimitPerUser,
+                    "User amount above limit"
+                );
+            }
         }
-        
+
         if (
             _amount > 0 &&
             address(redBerryReferral) != address(0) &&
             _referrer != address(0) &&
             _referrer != msg.sender &&
-            user.amount == 0
+            user.amount == 0 &&
+            _pid != 0
         ) {
             redBerryReferral.recordReferral(msg.sender, _referrer);
         }
@@ -1937,12 +1979,12 @@ contract MasterChef is Ownable {
                 .mul(pool.accRedBerryPerShare)
                 .div(1e12)
                 .sub(user.rewardDebt);
-            uint256 referarBalance = userReferalAmount[msg.sender];
+            uint256 referarBalance = userReferalAmount[_pid][msg.sender];
             if (referarBalance > 0) {
-                userReferalClaimedAmount[msg.sender] =
-                    userReferalClaimedAmount[msg.sender] +
+                userReferalClaimedAmount[_pid][msg.sender] =
+                    userReferalClaimedAmount[_pid][msg.sender] +
                     referarBalance;
-                userReferalAmount[msg.sender] = 0;
+                userReferalAmount[_pid][msg.sender] = 0;
             }
             _pendingAmount = pending + referarBalance;
             user.totalClaimedAmount = user.totalClaimedAmount + pending;
@@ -1962,7 +2004,9 @@ contract MasterChef is Ownable {
                 uint256 depositFee = _amount.mul(pool.depositFeeBP).div(10000);
                 pool.lpToken.safeTransfer(feeAddress, depositFee);
                 user.amount = user.amount.add(_amount).sub(depositFee);
-                pool.totalStaked = pool.totalStaked.add(_amount).sub(depositFee);
+                pool.totalStaked = pool.totalStaked.add(_amount).sub(
+                    depositFee
+                );
             } else {
                 user.amount = user.amount.add(_amount);
                 pool.totalStaked = pool.totalStaked.add(_amount);
@@ -1983,11 +2027,6 @@ contract MasterChef is Ownable {
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(_pid);
         payOrLockupPendingredb(_pid);
-        // uint256 pending = user
-        //     .amount
-        //     .mul(pool.accRedBerryPerShare)
-        //     .div(1e12)
-        //     .sub(user.rewardDebt);
 
         uint256 _pendingAmount;
         uint256 pending = user
@@ -1995,12 +2034,12 @@ contract MasterChef is Ownable {
             .mul(pool.accRedBerryPerShare)
             .div(1e12)
             .sub(user.rewardDebt);
-        uint256 referarBalance = userReferalAmount[msg.sender];
+        uint256 referarBalance = userReferalAmount[_pid][msg.sender];
         if (referarBalance > 0) {
-            userReferalClaimedAmount[msg.sender] =
-                userReferalClaimedAmount[msg.sender] +
+            userReferalClaimedAmount[_pid][msg.sender] =
+                userReferalClaimedAmount[_pid][msg.sender] +
                 referarBalance;
-            userReferalAmount[msg.sender] = 0;
+            userReferalAmount[_pid][msg.sender] = 0;
         }
         _pendingAmount = pending + referarBalance;
         user.totalClaimedAmount = user.totalClaimedAmount + pending;
@@ -2008,9 +2047,6 @@ contract MasterChef is Ownable {
             safeRedBerryTransfer(msg.sender, _pendingAmount);
         }
 
-        // if (pending > 0) {
-        //     safeRedBerryTransfer(msg.sender, pending);
-        // }
         if (_amount > 0) {
             user.amount = user.amount.sub(_amount);
             pool.totalStaked = pool.totalStaked.sub(_amount);
@@ -2025,15 +2061,21 @@ contract MasterChef is Ownable {
         PoolInfo storage pool = poolInfo[0];
         UserInfo storage user = userInfo[0][msg.sender];
         updatePool(0);
-        
-        if(pool.poolLimit > 0){
-            require(_amount.add(pool.totalStaked) <= pool.poolLimit, "Pool amount above limit");
+
+        if (pool.poolLimit > 0) {
+            require(
+                _amount.add(pool.totalStaked) <= pool.poolLimit,
+                "Pool amount above limit"
+            );
         }
-        
-        if(pool.poolLimitPerUser > 0){
-            require(_amount.add(user.amount) <= pool.poolLimitPerUser, "User amount above limit");
+
+        if (pool.poolLimitPerUser > 0) {
+            require(
+                _amount.add(user.amount) <= pool.poolLimitPerUser,
+                "User amount above limit"
+            );
         }
-        
+
         if (user.amount > 0) {
             uint256 pending = user
                 .amount
@@ -2199,8 +2241,8 @@ contract MasterChef is Ownable {
                 commissionAmount > 0 &&
                 user.amount > 0
             ) {
-                userReferalAmount[referrer] =
-                    userReferalAmount[referrer] +
+                userReferalAmount[_pid][referrer] =
+                    userReferalAmount[_pid][referrer] +
                     commissionAmount;
                 userPoolReferal[_pid][referrer] =
                     userPoolReferal[_pid][referrer] +
@@ -2213,27 +2255,22 @@ contract MasterChef is Ownable {
         }
     }
 
-    function getUserReferrerBalance(address _address)
+    // add whilisted User
+    function addUsertoWhitelisted(address _address, bool _bool)
         public
-        view
-        returns (uint256)
+        onlyOwner
     {
-        return userReferalAmount[_address];
+        whilistedUserList.push(_address);
+        whilistedUser[_address] = _bool;
     }
 
-    function getUserReferrerBalancePerPool(uint256 _pid, address _address)
+    function recoverWrongToken(IBEP20 _token, uint256 _tokenAmount)
         public
-        view
-        returns (uint256)
+        onlyOwner
     {
-        return userPoolReferal[_pid][_address];
-    }
-    
-    function recoverWrongToken(IBEP20 _token, uint256 _tokenAmount) public onlyOwner{
         require(!tokenFarmExists[_token], "Cannot withdraw Farm token");
-        
+
         IBEP20(_token).transfer(address(msg.sender), _tokenAmount);
         emit TokenRecovery(address(_token), _tokenAmount);
     }
-
 }

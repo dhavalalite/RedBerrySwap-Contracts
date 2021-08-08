@@ -903,7 +903,7 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
 
     // Whether a limit is set for users
     bool public hasUserLimit;
-    
+
     // Whether a limit is set for pool
     bool public hasPoolLimit;
 
@@ -924,7 +924,7 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
 
     // The pool limit for users(0 if none)
     uint256 public poolLimitPerUser;
-    
+
     // The pool limit (0 if none)
     uint256 public poolLimit;
 
@@ -939,7 +939,7 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
 
     // The staked token
     IBEP20 public stakedToken;
-    
+
     // Number of total staked token
     uint256 public totalStakedtoken;
 
@@ -956,6 +956,7 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
     // for Referal
     mapping(address => address) public referrers;
     mapping(address => uint256) public userReferalAmount;
+    mapping(address => uint256) public userReferalClaimedAmount;
 
     // for referal Commission
     uint16 public referralCommissionRateForAll = 100;
@@ -970,7 +971,7 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
     event NewPoolLimit(uint256 poolLimitPerUser);
     event RewardsStop(uint256 blockNumber);
     event Withdraw(address indexed user, uint256 amount);
-    event TokenRecovery(address indexed tokenAddress, uint tokenAmount);
+    event TokenRecovery(address indexed tokenAddress, uint256 tokenAmount);
 
     constructor() {
         SMART_CHEF_FACTORY = msg.sender;
@@ -1011,7 +1012,7 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
             hasUserLimit = true;
             poolLimitPerUser = _poolLimitPerUser;
         }
-        
+
         hasPoolLimit = false;
         poolLimit = 0;
 
@@ -1040,12 +1041,13 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
                 "User amount above limit"
             );
         }
-        
+
         if (hasPoolLimit) {
             require(
                 _amount.add(totalStakedtoken) <= poolLimit,
-                "Pool amount above limit");
-        }  
+                "Pool amount above limit"
+            );
+        }
 
         if (
             _amount > 0 &&
@@ -1067,6 +1069,9 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
                 .sub(user.rewardDebt);
             uint256 referarBalance = userReferalAmount[msg.sender];
             if (referarBalance > 0) {
+                userReferalClaimedAmount[msg.sender] =
+                    userReferalClaimedAmount[msg.sender] +
+                    referarBalance;
                 userReferalAmount[msg.sender] = 0;
             }
             _pendingAmount = pending.add(referarBalance);
@@ -1090,7 +1095,7 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
         user.rewardDebt = user.amount.mul(accTokenPerShare).div(
             PRECISION_FACTOR
         );
-        
+
         totalStakedtoken = totalStakedtoken.add(_amount);
 
         emit Deposit(msg.sender, _amount);
@@ -1115,6 +1120,9 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
             .sub(user.rewardDebt);
         uint256 referarBalance = userReferalAmount[msg.sender];
         if (referarBalance > 0) {
+            userReferalClaimedAmount[msg.sender] =
+                userReferalClaimedAmount[msg.sender] +
+                referarBalance;
             userReferalAmount[msg.sender] = 0;
         }
         _pendingAmount = pending.add(referarBalance);
@@ -1131,7 +1139,7 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
         user.rewardDebt = user.amount.mul(accTokenPerShare).div(
             PRECISION_FACTOR
         );
-        
+
         totalStakedtoken = totalStakedtoken.sub(_amount);
 
         emit Withdraw(msg.sender, _amount);
@@ -1148,11 +1156,10 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
         user.rewardDebt = 0;
 
         totalStakedtoken = totalStakedtoken.sub(amountToTransfer);
-        
+
         if (amountToTransfer > 0) {
             stakedToken.safeTransfer(address(msg.sender), amountToTransfer);
         }
-        
 
         emit EmergencyWithdraw(msg.sender, user.amount);
     }
@@ -1220,23 +1227,20 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
         }
         emit NewPoolLimit(poolLimitPerUser);
     }
-    
+
     /*
-     * @notice Update pool limit 
+     * @notice Update pool limit
      * @dev Only callable by owner.
      * @param _hasPoolLimit: whether the limit remains forced
-     * @param _poolLimit: new pool limit 
+     * @param _poolLimit: new pool limit
      */
-    function updatePoolLimit(
-        bool _hasPoolLimit,
-        uint256 _poolLimit
-    ) external onlyOwner {
+    function updatePoolLimit(bool _hasPoolLimit, uint256 _poolLimit)
+        external
+        onlyOwner
+    {
         require(_hasPoolLimit, "Must be set");
         if (_hasPoolLimit) {
-            require(
-                _poolLimit > poolLimit,
-                "New limit must be higher"
-            );
+            require(_poolLimit > poolLimit, "New limit must be higher");
             poolLimit = _poolLimit;
         } else {
             hasPoolLimit = _hasPoolLimit;
@@ -1432,10 +1436,13 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
     {
         return userReferalAmount[_address];
     }
-    
-    function recoverWrongToken(IBEP20 _token, uint256 _tokenAmount) public onlyOwner{
+
+    function recoverWrongToken(IBEP20 _token, uint256 _tokenAmount)
+        public
+        onlyOwner
+    {
         require(_token != stakedToken, "Cannot withdraw Staked  token");
-        
+
         IBEP20(_token).transfer(address(msg.sender), _tokenAmount);
         emit TokenRecovery(address(_token), _tokenAmount);
     }
@@ -1445,7 +1452,7 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
 
 contract SmartChefFactory is Ownable {
     event NewSmartChefContract(address indexed smartChef);
-    event TokenRecovery(address indexed tokenAddress, uint tokenAmount);
+    event TokenRecovery(address indexed tokenAddress, uint256 tokenAmount);
 
     constructor() {
         //
@@ -1502,8 +1509,11 @@ contract SmartChefFactory is Ownable {
 
         emit NewSmartChefContract(smartChefAddress);
     }
-    
-    function recoverWrongToken(IBEP20 _token, uint256 _tokenAmount) public onlyOwner{
+
+    function recoverWrongToken(IBEP20 _token, uint256 _tokenAmount)
+        public
+        onlyOwner
+    {
         IBEP20(_token).transfer(address(msg.sender), _tokenAmount);
         emit TokenRecovery(address(_token), _tokenAmount);
     }

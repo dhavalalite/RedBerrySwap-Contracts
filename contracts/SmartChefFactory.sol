@@ -1436,16 +1436,6 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
     {
         return userReferalAmount[_address];
     }
-
-    function recoverWrongToken(IBEP20 _token, uint256 _tokenAmount)
-        public
-        onlyOwner
-    {
-        require(_token != stakedToken, "Cannot withdraw Staked  token");
-
-        IBEP20(_token).transfer(address(msg.sender), _tokenAmount);
-        emit TokenRecovery(address(_token), _tokenAmount);
-    }
 }
 
 // File: contracts/SmartChefFactory.sol

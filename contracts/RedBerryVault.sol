@@ -1019,17 +1019,6 @@ contract RedBerryVault is Ownable, Pausable {
     }
 
     /**
-     * @notice Withdraw unexpected tokens sent to the RedBerry Vault
-     */
-    function inCaseTokensGetStuck(address _token) external onlyAdmin {
-        require(_token != address(token), "Token cannot be same as deposit token");
-        require(_token != address(receiptToken), "Token cannot be same as receipt token");
-
-        uint256 amount = IERC20(_token).balanceOf(address(this));
-        IERC20(_token).safeTransfer(msg.sender, amount);
-    }
-
-    /**
      * @notice Triggers stopped state
      * @dev Only possible when contract not paused.
      */
@@ -1158,10 +1147,15 @@ contract RedBerryVault is Ownable, Pausable {
         }
         return size > 0;
     }
-    
-    function recoverWrongToken(IERC20 _token, uint256 _tokenAmount) public onlyAdmin{
-        require(_token != token, "Cannot withdraw REDB token");
-        IERC20(_token).transfer(address(msg.sender), _tokenAmount);
-        emit TokenRecovery(address(_token), _tokenAmount);
+
+    /**
+     * @notice Withdraw unexpected tokens sent to the RedBerry Vault
+     */
+    function recoverWrongToken(address _token) external onlyAdmin {
+        require(_token != address(token), "Token cannot be same as deposit token");
+        require(_token != address(receiptToken), "Token cannot be same as receipt token");
+
+        uint256 amount = IERC20(_token).balanceOf(address(this));
+        IERC20(_token).safeTransfer(msg.sender, amount);
     }
 }

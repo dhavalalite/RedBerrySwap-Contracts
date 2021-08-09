@@ -943,6 +943,9 @@ contract RedBerry is BEP20 {
     // The operator can only update the transfer tax rate
     address private _operator;
 
+    // Addresses that excluded from antiWhale
+    mapping(address => bool) private _excludedFromAntiWhale;
+
     // Max transfer amount rate in basis points. (default is 0.5% of total supply)
     uint16 public maxTransferAmountRate = 50;
     
@@ -988,7 +991,12 @@ contract RedBerry is BEP20 {
     
     modifier antiWhale(address sender, address recipient, uint256 amount) {
         if (maxTransferAmount() > 0) {
-            require(amount <= maxTransferAmount(), "REDBERRY::antiWhale: Transfer amount exceeds the maxTransferAmount");
+             if (
+                _excludedFromAntiWhale[sender] == false
+                && _excludedFromAntiWhale[recipient] == false
+            ) {
+                require(amount <= maxTransferAmount(), "REDBERRY::antiWhale: Transfer amount exceeds the maxTransferAmount");
+            }
         }
         _;
     }
@@ -1032,6 +1040,22 @@ contract RedBerry is BEP20 {
             amount = sendAmount;
         }
     }
+
+    /**
+    * @dev Returns the address is excluded from antiWhale or not.
+    */
+    function isExcludedFromAntiWhale(address _account) public view returns (bool) {
+        return _excludedFromAntiWhale[_account];
+    }
+
+    /**
+     * @dev Exclude or include an address from antiWhale.
+     * Can only be called by the current operator.
+     */
+    function setExcludedFromAntiWhale(address _account, bool _excluded) public onlyOperator {
+        _excludedFromAntiWhale[_account] = _excluded;
+    }
+
     
     /**
      * @dev Update the transfer tax rate.

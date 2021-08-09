@@ -1704,6 +1704,7 @@ contract MasterChef is Ownable {
         public userReferalClaimedAmount;
     mapping(uint256 => mapping(address => uint256)) public userPoolReferal;
     mapping(IBEP20 => bool) public tokenFarmExists;
+    mapping(IBEP20 => uint256) public stakedTokenAmount; 
 
     // for white listed user
     mapping(address => bool) public whilistedUser;
@@ -2012,6 +2013,7 @@ contract MasterChef is Ownable {
                 pool.totalStaked = pool.totalStaked.add(_amount);
             }
         }
+        stakedTokenAmount[pool.lpToken] = stakedTokenAmount[pool.lpToken].add(_amount);
         user.rewardDebt = user.amount.mul(pool.accRedBerryPerShare).div(1e12);
         emit Deposit(msg.sender, _pid, _amount);
     }
@@ -2053,6 +2055,8 @@ contract MasterChef is Ownable {
             pool.lpToken.safeTransfer(address(msg.sender), _amount);
         }
         user.rewardDebt = user.amount.mul(pool.accRedBerryPerShare).div(1e12);
+        stakedTokenAmount[pool.lpToken] = stakedTokenAmount[pool.lpToken].sub(_amount);
+
         emit Withdraw(msg.sender, _pid, _amount);
     }
 
@@ -2133,6 +2137,8 @@ contract MasterChef is Ownable {
         user.rewardDebt = 0;
         pool.totalStaked = pool.totalStaked.sub(amount);
         pool.lpToken.safeTransfer(address(msg.sender), amount);
+        stakedTokenAmount[pool.lpToken] = stakedTokenAmount[pool.lpToken].sub(amount);
+
         emit EmergencyWithdraw(msg.sender, _pid, amount);
     }
 
@@ -2264,11 +2270,16 @@ contract MasterChef is Ownable {
         whilistedUser[_address] = _bool;
     }
 
+    // check token balance of smart contract
+    function checkTokenBalance(IBEP20 _token) public view returns(uint){
+        return IBEP20(_token).balanceOf(address(this));
+    }
+
     function recoverWrongToken(IBEP20 _token, uint256 _tokenAmount)
         public
         onlyOwner
     {
-        require(!tokenFarmExists[_token], "Cannot withdraw Farm token");
+        require(checkTokenBalance(_token).sub(stakedTokenAmount[_token]) >= _tokenAmount , "Cannot withdraw Farm token");
 
         IBEP20(_token).transfer(address(msg.sender), _tokenAmount);
         emit TokenRecovery(address(_token), _tokenAmount);
